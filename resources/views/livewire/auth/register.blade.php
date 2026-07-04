@@ -7,31 +7,33 @@
 
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
-            <!-- First Name -->
-            <flux:input
-                name="first_name"
-                :label="__('First Name')"
-                :value="old('first_name')"
-                type="text"
-                required
-                autofocus
-                autocomplete="given-name"
-                :placeholder="__('First name')"
-            />
+            <div class="grid grid-cols-2 gap-4">
+                <!-- First Name -->
+                <flux:input
+                    name="first_name"
+                    :label="__('First name')"
+                    :value="old('first_name')"
+                    type="text"
+                    required
+                    autofocus
+                    autocomplete="given-name"
+                    :placeholder="__('First name')"
+                />
 
-            <!-- Last Name -->
-            <flux:input
-                name="last_name"
-                :label="__('Last Name')"
-                :value="old('last_name')"
-                type="text"
-                required
-                autocomplete="family-name"
-                :placeholder="__('Last name')"
-            />
+                <!-- Last Name -->
+                <flux:input
+                    name="last_name"
+                    :label="__('Last name')"
+                    :value="old('last_name')"
+                    type="text"
+                    required
+                    autocomplete="family-name"
+                    :placeholder="__('Last name')"
+                />
+            </div>
 
             <!-- Role Selection -->
-            <flux:select name="role" :label="__('System Role')" required :placeholder="__('Select a role...')">
+            <flux:select name="role" :label="__('Role')" required :placeholder="__('Select a role...')">
                 @foreach($roles as $role)
                     <flux:select.option value="{{ $role->name }}">{{ str($role->name)->title()->replace('_', ' ') }}</flux:select.option>
                 @endforeach

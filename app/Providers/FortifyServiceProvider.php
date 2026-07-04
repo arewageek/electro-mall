@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 class FortifyServiceProvider extends ServiceProvider
 {
