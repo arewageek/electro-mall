@@ -50,8 +50,8 @@
             </div>
         </form>
 
-        <div class="space-x-1 text-sm text-left rtl:space-x-reverse text-[#787774] mt-4">
-            <span>{{ __('Don\'t have an account?') }}</span>
+        <div class="space-x-1 text-sm text-left rtl:space-x-reverse mt-4">
+            <span class="text-zinc-600">{{ __('Don\'t have an account?') }}</span>
             <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
         </div>
     </div>
