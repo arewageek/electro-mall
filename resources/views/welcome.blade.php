@@ -203,8 +203,11 @@
                 });
             });
 
-            // 3. Scroll Pinning Architecture (Desktop Only)
-            if (window.innerWidth >= 768) {
+            // 3 & 4. Responsive GSAP Architecture (Desktop Only)
+            let mm = gsap.matchMedia();
+
+            mm.add("(min-width: 1024px)", () => {
+                // Scroll Pinning Architecture
                 ScrollTrigger.create({
                     trigger: ".gs-pin-container",
                     start: "top 15%",
@@ -212,10 +215,8 @@
                     pin: ".gs-pin-text",
                     pinSpacing: false
                 });
-            }
 
-            // 4. Typographic Scrub Reveal (Desktop Only for better mobile performance)
-            if (window.innerWidth >= 768) {
+                // Typographic Scrub Reveal
                 const textEl = document.querySelector('.gs-scrub-text');
                 if (textEl) {
                     gsap.fromTo(textEl, 
@@ -231,7 +232,7 @@
                         }
                     );
                 }
-            }
+            });
         });
     </script>
 </body>

@@ -1,42 +1,62 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
     <head>
         @include('partials.head')
+        <style>
+            body {
+                font-family: 'SF Pro Display', 'Geist Sans', 'Helvetica Neue', 'Switzer', sans-serif;
+                background-color: #F7F6F3;
+                color: #111111;
+            }
+        </style>
     </head>
-    <body class="min-h-screen bg-white antialiased dark:bg-linear-to-b dark:from-neutral-950 dark:to-neutral-900">
-        <div class="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
-            <div class="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-e dark:border-neutral-800">
-                <div class="absolute inset-0 bg-neutral-900"></div>
-                <a href="{{ route('home') }}" class="relative z-20 flex items-center text-lg font-medium" wire:navigate>
-                    <span class="flex h-10 w-10 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="me-2 h-7 fill-current text-white" />
-                    </span>
-                    {{ config('app.name', 'Laravel') }}
+    <body class="min-h-screen antialiased flex flex-col md:flex-row">
+        
+        <!-- Interactive/Branding Side (Left on Desktop) -->
+        <div class="hidden md:flex w-1/2 relative bg-[#FBFBFA] border-r border-[#EAEAEA] flex-col justify-between p-12 overflow-hidden">
+            <div class="absolute inset-0 opacity-[0.03] bg-[url('https://picsum.photos/seed/warehouse-boxes/1000/1000')] bg-cover bg-center"></div>
+            
+            <div class="relative z-10 w-full flex justify-start">
+                <a href="{{ route('home') }}" class="font-semibold text-2xl tracking-tight" wire:navigate>
+                    WMS
                 </a>
+            </div>
 
-                @php
-                    [$message, $author] = str(Illuminate\Foundation\Inspiring::quotes()->random())->explode('-');
-                @endphp
-
-                <div class="relative z-20 mt-auto">
-                    <blockquote class="space-y-2">
-                        <flux:heading size="lg">&ldquo;{{ trim($message) }}&rdquo;</flux:heading>
-                        <footer><flux:heading>{{ trim($author) }}</flux:heading></footer>
-                    </blockquote>
+            <div class="relative z-10 w-full max-w-md mx-auto flex flex-col justify-center grow">
+                <h1 class="text-4xl lg:text-5xl font-medium leading-[1.05] tracking-tight mb-6">
+                    Traceability at scale.
+                </h1>
+                <p class="text-[#787774] text-lg leading-[1.6] mb-12">
+                    Enter the warehouse management system to access real-time stock tracking, barcode routing, and fulfillment workflows.
+                </p>
+                
+                <div class="p-5 bg-white rounded-xl flex items-center gap-4 border border-[#EAEAEA] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                    <div class="w-10 h-10 rounded-full bg-[#EDF3EC] text-[#346538] flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-sm text-[#111111]">Secure Terminal</h4>
+                        <p class="text-xs text-[#787774]">Authorized warehouse personnel only</p>
+                    </div>
                 </div>
             </div>
-            <div class="w-full lg:p-8">
-                <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                    <a href="{{ route('home') }}" class="z-20 flex flex-col items-center gap-2 font-medium lg:hidden" wire:navigate>
-                        <span class="flex h-9 w-9 items-center justify-center rounded-md">
-                            <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
-                        </span>
-
-                        <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
-                    </a>
-                    {{ $slot }}
-                </div>
+        </div>
+        
+        <!-- Auth Form Side (Right on Desktop, Full on Mobile) -->
+        <div class="w-full md:w-1/2 min-h-screen flex flex-col justify-between px-6 py-12 lg:px-24 bg-[#FFFFFF]">
+            <a href="{{ route('home') }}" class="md:hidden font-semibold text-xl tracking-tight mb-10 text-center" wire:navigate>
+                WMS
+            </a>
+            
+            <div class="w-full max-w-sm mx-auto flex flex-col justify-center grow">
+                {{ $slot }}
             </div>
+            
+            <p class="text-center md:text-left text-xs text-[#787774] mt-12 font-mono tracking-wide mx-auto max-w-sm w-full">
+                WMS &copy; {{ date('Y') }}
+            </p>
         </div>
 
         @persist('toast')
