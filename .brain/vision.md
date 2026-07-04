@@ -1,7 +1,7 @@
 # Product Vision
 
 ## 1. Project Overview
-The project is an Automated Warehouse Management System (WMS) designed for ELECTRO MALL, an electronics retail and distribution company in Kano, Nigeria. It aims to replace the inefficient, error-prone manual inventory handling system (paper logbooks, spreadsheets) with a robust digital solution. By integrating barcode and Quick Response (QR) code technologies, the system provides real-time tracking of high-value, fast-moving electronic goods, mitigating issues like stock discrepancies, out-of-stock scenarios, misplaced inventory, and delayed order fulfillments.
+The project is Electro Mall, an electronics retail and distribution company in Kano, Nigeria. It aims to replace the inefficient, error-prone manual inventory handling system (paper logbooks, spreadsheets) with a robust digital solution. By integrating barcode and Quick Response (QR) code technologies, the system provides real-time tracking of high-value, fast-moving electronic goods, mitigating issues like stock discrepancies, out-of-stock scenarios, misplaced inventory, and delayed order fulfillments.
 
 ## 2. Business Model & Offerings
 - **Automated Inventory Tracking**: Real-time visibility of stock levels and inventory movements, eliminating data entry errors and time lags.

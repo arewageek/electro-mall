@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>WMS</title>
+    <title>{{ config('app.name') }}</title>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -26,7 +26,7 @@
     <!-- Navigation -->
     <nav class="fixed top-0 w-full z-50 bg-[#F7F6F3]/80 backdrop-blur-md border-b border-[#EAEAEA]">
         <div class="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-            <span class="font-semibold text-lg md:text-xl tracking-tight">WMS</span>
+            <span class="font-semibold text-lg md:text-xl tracking-tight">{{ config('app.name') }}</span>
             <div class="flex gap-4">
                 @auth
                     <a href="{{ route('dashboard') }}" class="px-4 md:px-5 py-2 text-sm bg-[#111111] text-white rounded active:scale-[0.98] transition-transform shadow-sm">
@@ -50,7 +50,7 @@
                     simplified.
                 </h1>
                 <p class="text-[#787774] text-base md:text-lg max-w-xl mx-auto md:mx-0 leading-[1.6] mb-8 md:mb-10">
-                    Replace manual logbooks with real-time barcode and QR scanning. Built specifically for WMS to track items accurately and efficiently.
+                    Replace manual logbooks with real-time barcode and QR scanning. Built specifically for {{ config('app.name') }} to track items accurately and efficiently.
                 </p>
                 <div class="flex gap-4 justify-center md:justify-start">
                     <a href="#features" class="px-6 py-3 bg-[#111111] text-white rounded font-medium active:scale-[0.98] transition-transform w-full md:w-auto text-center">
@@ -169,10 +169,10 @@
             </a>
         @else
             <a href="{{ route('login') }}" class="px-6 md:px-8 py-3 md:py-4 bg-[#111111] text-white rounded font-medium active:scale-[0.98] transition-transform text-base md:text-lg shadow-sm w-full sm:w-auto">
-                Log in to WMS
+                Log in to {{ config('app.name') }}
             </a>
         @endauth
-        <p class="text-[#787774] text-xs md:text-sm mt-12 md:mt-16 tracking-wide">WMS &copy; {{ date('Y') }}</p>
+        <p class="text-[#787774] text-xs md:text-sm mt-12 md:mt-16 tracking-wide">{{ config('app.name') }} &copy; {{ date('Y') }}</p>
     </footer>
 
     <!-- GSAP Motion Choreography -->

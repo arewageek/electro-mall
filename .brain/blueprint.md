@@ -14,7 +14,8 @@ While the initial documentation outlined a Python/Tkinter desktop application, t
 - **Key UI Patterns**: Responsive grids for dashboards, robust data tables for inventory, and streamlined forms for transaction entry.
 
 ## 3. Database Schema (Core Entities)
-- **User**: Authentication, role-based access control (Admin, Manager, Clerk, Picker, Receiving).
+- **Primary Keys**: All system schemas and pivot tables exclusively use `UUIDs` instead of auto-incrementing integers to ensure high scalability and distributed system compatibility.
+- **User**: Authentication, role-based access control (Admin, Manager, Clerk, Picker, Receiving). Uses `first_name` and `last_name` with a dynamic `name()` attribute.
 - **Category**: Product classifications.
 - **Product**: Electronic goods catalog (SKU, names, specifications, barcode/QR data).
 - **Location**: Warehouse storage addresses (zone, aisle, rack, shelf, bin).

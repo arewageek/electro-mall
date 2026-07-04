@@ -18,7 +18,7 @@
             
             <div class="relative z-10 w-full flex justify-start">
                 <a href="{{ route('home') }}" class="font-semibold text-2xl tracking-tight" wire:navigate>
-                    WMS
+                    {{ config('app.name') }}
                 </a>
             </div>
 
@@ -47,7 +47,7 @@
         <!-- Auth Form Side (Right on Desktop, Full on Mobile) -->
         <div class="w-full md:w-1/2 min-h-screen flex flex-col justify-between px-6 py-12 lg:px-24 bg-[#FFFFFF]">
             <a href="{{ route('home') }}" class="md:hidden font-semibold text-xl tracking-tight mb-10 text-center" wire:navigate>
-                WMS
+                {{ config('app.name') }}
             </a>
             
             <div class="w-full max-w-sm mx-auto flex flex-col justify-center grow">
@@ -55,7 +55,7 @@
             </div>
             
             <p class="text-center md:text-left text-xs text-[#787774] mt-12 font-mono tracking-wide mx-auto max-w-sm w-full">
-                WMS &copy; {{ date('Y') }}
+                {{ config('app.name') }} &copy; {{ date('Y') }}
             </p>
         </div>
 
