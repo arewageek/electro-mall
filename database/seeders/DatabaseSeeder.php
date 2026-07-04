@@ -16,7 +16,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RolesAndPermissionsSeeder::class,
+            PermissionSeeder::class,
+            RoleSeeder::class,
         ]);
 
         // User::factory(10)->create();
