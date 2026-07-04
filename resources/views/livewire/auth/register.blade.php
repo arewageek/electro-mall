@@ -7,17 +7,35 @@
 
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
-            <!-- Name -->
+            <!-- First Name -->
             <flux:input
-                name="name"
-                :label="__('Name')"
-                :value="old('name')"
+                name="first_name"
+                :label="__('First Name')"
+                :value="old('first_name')"
                 type="text"
                 required
                 autofocus
-                autocomplete="name"
-                :placeholder="__('Full name')"
+                autocomplete="given-name"
+                :placeholder="__('First name')"
             />
+
+            <!-- Last Name -->
+            <flux:input
+                name="last_name"
+                :label="__('Last Name')"
+                :value="old('last_name')"
+                type="text"
+                required
+                autocomplete="family-name"
+                :placeholder="__('Last name')"
+            />
+
+            <!-- Role Selection -->
+            <flux:select name="role" :label="__('System Role')" required :placeholder="__('Select a role...')">
+                @foreach($roles as $role)
+                    <flux:select.option value="{{ $role->name }}">{{ str($role->name)->title()->replace('_', ' ') }}</flux:select.option>
+                @endforeach
+            </flux:select>
 
             <!-- Email Address -->
             <flux:input
