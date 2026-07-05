@@ -3,17 +3,18 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\Spatie\Permission\Models\Role>
+ * @extends Factory<Role>
  */
 class RoleFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     * @var class-string<Model>
      */
     protected $model = Role::class;
 
@@ -25,7 +26,7 @@ class RoleFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->word() . ' Role',
+            'name' => $this->faker->unique()->word().' Role',
             'guard_name' => 'web',
         ];
     }

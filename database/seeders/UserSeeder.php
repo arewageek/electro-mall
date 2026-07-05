@@ -12,11 +12,15 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $test_user = User::factory()->create([
-            'first_name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-        ]);
+        $test_user = User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'first_name' => 'Test',
+                'last_name' => 'User',
+                'password' => bcrypt('password'),
+                'email_verified_at' => now(),
+            ]
+        );
 
         $test_user->assignRole('super_admin');
     }

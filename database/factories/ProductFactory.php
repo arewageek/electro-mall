@@ -1,0 +1,35 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Category;
+use App\Models\Product;
+/**
+ * @extends Factory<Product>
+ */
+use App\Models\Supplier;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ProductFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $name = ucwords(fake()->words(3, true));
+
+        return [
+            'category_id' => Category::inRandomOrder()->value('id') ?? Category::factory(),
+            'supplier_id' => Supplier::inRandomOrder()->value('id') ?? Supplier::factory(),
+            'name' => ucwords($name),
+            'slug' => str()->slug($name),
+            'sku' => 'SKU-'.strtoupper(fake()->bothify('??####')),
+            'barcode' => fake()->unique()->ean13(),
+            'description' => fake()->paragraph(),
+            'unit_price' => fake()->randomFloat(2, 10, 2500),
+        ];
+    }
+}
