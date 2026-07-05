@@ -58,11 +58,11 @@
         {{ $users->links() }}
     </div>
 
-    <flux:modal wire:model="showModal" class="md:w-[500px]">
+    <flux:modal wire:model="show_modal" class="md:w-[600px]">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">{{ $isEditing ? 'Edit User' : 'Add New User' }}</flux:heading>
-                <flux:subheading>Fill in the details for the warehouse employee.</flux:subheading>
+                <flux:heading size="lg">{{ $is_editing ? 'Edit User' : 'Create New User' }}</flux:heading>
+                <flux:subheading>Manage user details, password, and system role.</flux:subheading>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -96,7 +96,7 @@
             </flux:field>
 
             <flux:field>
-                <flux:label>Password {{ $isEditing ? '(Leave blank to keep current)' : '' }}</flux:label>
+                <flux:label>Password {{ $is_editing ? '(Leave blank to keep current)' : '' }}</flux:label>
                 <flux:input wire:model="password" type="password" />
                 <flux:error name="password" />
             </flux:field>
@@ -106,7 +106,7 @@
                 <flux:modal.close>
                     <flux:button variant="ghost">Cancel</flux:button>
                 </flux:modal.close>
-                <flux:button wire:click="save" variant="primary">{{ $isEditing ? 'Save Changes' : 'Create User' }}</flux:button>
+                <flux:button wire:click="save" variant="primary">{{ $is_editing ? 'Save Changes' : 'Create User' }}</flux:button>
             </div>
         </div>
     </flux:modal>

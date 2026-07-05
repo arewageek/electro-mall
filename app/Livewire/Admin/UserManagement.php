@@ -22,8 +22,8 @@ class UserManagement extends Component
     public $password = '';
     public $role = '';
 
-    public $isEditing = false;
-    public $showModal = false;
+    public $is_editing = false;
+    public $show_modal = false;
 
     public function rules()
     {
@@ -31,7 +31,7 @@ class UserManagement extends Component
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $this->user_id],
-            'password' => $this->isEditing ? ['nullable', Password::defaults()] : ['required', Password::defaults()],
+            'password' => $this->is_editing ? ['nullable', Password::defaults()] : ['required', Password::defaults()],
             'role' => ['required', 'exists:roles,name'],
         ];
     }
@@ -39,8 +39,8 @@ class UserManagement extends Component
     public function create()
     {
         $this->reset(['user_id', 'first_name', 'last_name', 'email', 'password', 'role']);
-        $this->isEditing = false;
-        $this->showModal = true;
+        $this->is_editing = false;
+        $this->show_modal = true;
         $this->resetValidation();
     }
 
@@ -53,8 +53,8 @@ class UserManagement extends Component
         $this->email = $user->email;
         $this->role = $user->roles->first()?->name ?? '';
         
-        $this->isEditing = true;
-        $this->showModal = true;
+        $this->is_editing = true;
+        $this->show_modal = true;
         $this->resetValidation();
     }
 
@@ -81,7 +81,7 @@ class UserManagement extends Component
 
         $user->syncRoles([$this->role]);
 
-        $this->showModal = false;
+        $this->show_modal = false;
         
         $message = $this->user_id ? 'User updated successfully.' : 'User created successfully.';
         Flux::toast(variant: 'success', text: __($message));
