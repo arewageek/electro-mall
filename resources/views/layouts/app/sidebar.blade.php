@@ -33,7 +33,7 @@
 
                 @canany(['inventory.view', 'product.manage'])
                 <flux:sidebar.group :heading="__('Inventory')" class="grid mt-4">
-                    <flux:sidebar.item icon="queue-list" href="#" wire:navigate>
+                    <flux:sidebar.item icon="queue-list" :href="route('inventory.stock')" :current="request()->routeIs('inventory.stock')" wire:navigate>
                         {{ __('Stock') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="qr-code" :href="route('inventory.products')" :current="request()->routeIs('inventory.products')" wire:navigate>
