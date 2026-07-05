@@ -58,7 +58,7 @@
 
                 @can('user.manage')
                 <flux:sidebar.group :heading="__('Administration')" class="grid mt-4">
-                    <flux:sidebar.item icon="users" href="#" wire:navigate>
+                    <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
                         {{ __('Users') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="shield-check" href="#" wire:navigate>
