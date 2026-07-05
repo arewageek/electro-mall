@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<Inventory>
  */
+use App\Models\Product;
+use App\Models\Location;
+
 class InventoryFactory extends Factory
 {
     /**
@@ -18,7 +21,9 @@ class InventoryFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
+            'location_id' => Location::inRandomOrder()->first()?->id ?? Location::factory(),
+            'quantity' => fake()->numberBetween(0, 500),
         ];
     }
 }
