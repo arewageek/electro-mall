@@ -18,7 +18,12 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'order_number' => 'ORD-' . fake()->unique()->bothify('########-????'),
+            'customer_name' => fake()->name(),
+            'customer_email' => fake()->safeEmail(),
+            'status' => fake()->randomElement(['pending', 'processing', 'picked', 'shipped', 'delivered', 'cancelled']),
+            'total_amount' => fake()->randomFloat(2, 20, 5000),
+            'shipping_address' => fake()->address(),
         ];
     }
 }

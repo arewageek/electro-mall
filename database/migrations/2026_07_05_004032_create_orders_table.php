@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->string('order_number')->unique();
+            $table->string('customer_name')->nullable();
+            $table->string('customer_email')->nullable();
+            $table->enum('status', ['pending', 'processing', 'picked', 'shipped', 'delivered', 'cancelled'])->default('pending');
+            $table->decimal('total_amount', 10, 2)->default(0);
+            $table->text('shipping_address')->nullable();
             $table->timestamps();
         });
     }
