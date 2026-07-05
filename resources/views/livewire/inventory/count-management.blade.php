@@ -38,7 +38,7 @@
                                 </flux:badge>
                             </flux:table.cell>
                             <flux:table.cell>
-                                <span class="font-medium {{ $item->quantity <= $item->product->min_stock_level ? 'text-red-600' : 'text-zinc-900' }}">
+                                <span class="font-medium {{ $item->quantity <= 150 ? 'text-red-600' : 'text-zinc-900' }}">
                                     {{ number_format($item->quantity) }}
                                 </span>
                             </flux:table.cell>

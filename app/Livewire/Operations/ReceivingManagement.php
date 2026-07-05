@@ -124,8 +124,14 @@ class ReceivingManagement extends Component
     {
         $this->validate([
             'receive_items.*.receiving_now' => ['required', 'numeric', 'min:0'],
-            'receive_items.*.location_id' => ['required_if:receive_items.*.receiving_now,>,0'],
         ]);
+
+        foreach ($this->receive_items as $index => $rItem) {
+            if ($rItem['receiving_now'] > 0 && empty($rItem['location_id'])) {
+                $this->addError("receive_items.{$index}.location_id", __('You must select a location when receiving an item.'));
+                return;
+            }
+        }
 
         $po = PurchaseOrder::findOrFail($this->receiving_po_id);
         $total_received_in_this_batch = 0;
