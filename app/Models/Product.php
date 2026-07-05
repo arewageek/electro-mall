@@ -37,4 +37,12 @@ class Product extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
+
+    /**
+     * Get the inventories for the product.
+     */
+    public function inventories(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Inventory::class);
+    }
 }

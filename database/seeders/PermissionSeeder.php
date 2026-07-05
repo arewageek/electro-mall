@@ -26,6 +26,7 @@ class PermissionSeeder extends Seeder
             'inventory.view',
             'inventory.update',
             'variance.approve',
+            'supplier.manage',
             'shipment.receive',
             'order.pick',
             'report.view',
