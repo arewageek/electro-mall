@@ -6,6 +6,7 @@ use App\Models\Inventory;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\InventoryVariance;
 use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -141,27 +142,19 @@ class CountManagement extends Component
 
             // TODO: Priority 2 - Replace this direct update with InventoryVariance logic
             if ($diff != 0) {
-                if ($inv) {
-                    $inv->update(['quantity' => $this->current_count]);
-                } else {
-                    $inv = Inventory::create([
-                        'product_id' => $this->current_product_id,
-                        'location_id' => $this->current_location_id,
-                        'quantity' => $this->current_count,
-                    ]);
-                }
-
-                Transaction::create([
+                InventoryVariance::create([
                     'product_id' => $this->current_product_id,
                     'location_id' => $this->current_location_id,
-                    'user_id' => auth()->id(),
-                    'type' => 'count_adjustment',
-                    'quantity' => $diff,
-                    'notes' => 'Fast Scanner Count Reconcilation',
+                    'expected_quantity' => $expected,
+                    'counted_quantity' => $this->current_count,
+                    'status' => 'pending',
+                    'counted_by' => auth()->id(),
+                    'notes' => 'Scanner Count Discrepancy',
                 ]);
+                Flux::toast(variant: 'warning', text: 'Variance logged for Manager Approval');
+            } else {
+                Flux::toast(variant: 'success', text: 'Count matched for '.$this->current_product_name);
             }
-
-            Flux::toast(variant: 'success', text: 'Saved '.$this->current_product_name);
 
             // Reset product state for next scan
             $this->current_product_id = null;
@@ -197,18 +190,17 @@ class CountManagement extends Component
             return;
         }
 
-        $inventory->update(['quantity' => $this->counted_quantity]);
-
-        Transaction::create([
+        InventoryVariance::create([
             'product_id' => $inventory->product_id,
             'location_id' => $inventory->location_id,
-            'user_id' => auth()->id(),
-            'type' => 'count_adjustment',
-            'quantity' => $diff,
-            'notes' => 'Cycle Count Reconcilation: '.$this->notes,
+            'expected_quantity' => $inventory->quantity,
+            'counted_quantity' => $this->counted_quantity,
+            'status' => 'pending',
+            'counted_by' => auth()->id(),
+            'notes' => 'Manual Count Discrepancy: '.$this->notes,
         ]);
 
-        Flux::toast(variant: 'success', text: __('Inventory count reconciled and adjusted.'));
+        Flux::toast(variant: 'warning', text: __('Variance submitted for Manager Approval.'));
         $this->show_modal = false;
         $this->reset(['inventory_id', 'product_name', 'location_name', 'expected_quantity', 'counted_quantity', 'notes']);
     }
