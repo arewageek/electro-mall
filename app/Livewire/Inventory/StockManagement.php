@@ -64,8 +64,15 @@ class StockManagement extends Component
             'quantity' => $this->quantity,
         ];
 
+        $old_quantity = 0;
+        $transaction_type = 'count_adjustment';
+        
+        if ($this->inventory_id) {
+            $inventory = Inventory::findOrFail($this->inventory_id);
+            $old_quantity = $inventory->quantity;
+        }
+
         // Check if there's already an inventory record for this product at this location
-        // If it's a new record or moving to a location that already has it, we might want to consolidate
         $existing = Inventory::where('product_id', $this->product_id)
             ->where('location_id', $this->location_id)
             ->when($this->inventory_id, function($q) {
@@ -74,19 +81,52 @@ class StockManagement extends Component
             ->first();
 
         if ($existing) {
-            // Consolidate quantity
-            $existing->increment('quantity', $this->quantity);
+            // Consolidate quantity: If moving stock from one location to another where it already exists
+            $added_quantity = $this->quantity; // The amount we are saying exists here now from the move
+            
+            $existing->increment('quantity', $added_quantity);
+            
             if ($this->inventory_id) {
+                // We moved it, so delete the old record
                 Inventory::findOrFail($this->inventory_id)->delete();
+                $transaction_type = 'move';
+            } else {
+                $transaction_type = 'receive';
             }
+            
+            \App\Models\Transaction::create([
+                'product_id' => $this->product_id,
+                'location_id' => $this->location_id,
+                'user_id' => auth()->id(),
+                'type' => $transaction_type,
+                'quantity' => $added_quantity,
+                'notes' => 'Stock consolidated/moved.',
+            ]);
+            
             Flux::toast(variant: 'success', text: __('Stock consolidated successfully.'));
         } else {
+            $diff = $this->quantity - $old_quantity;
+            
             if ($this->inventory_id) {
+                $transaction_type = 'count_adjustment';
                 Inventory::findOrFail($this->inventory_id)->update($data);
                 Flux::toast(variant: 'success', text: __('Stock updated successfully.'));
             } else {
+                $transaction_type = 'receive';
+                $diff = $this->quantity; // All of it is new
                 Inventory::create($data);
                 Flux::toast(variant: 'success', text: __('Stock added successfully.'));
+            }
+            
+            if ($diff != 0 || $transaction_type === 'move') {
+                \App\Models\Transaction::create([
+                    'product_id' => $this->product_id,
+                    'location_id' => $this->location_id,
+                    'user_id' => auth()->id(),
+                    'type' => $transaction_type,
+                    'quantity' => $diff,
+                    'notes' => 'Stock record created/updated.',
+                ]);
             }
         }
 
@@ -96,7 +136,19 @@ class StockManagement extends Component
     
     public function delete($id)
     {
-        Inventory::findOrFail($id)->delete();
+        $inventory = Inventory::findOrFail($id);
+        
+        \App\Models\Transaction::create([
+            'product_id' => $inventory->product_id,
+            'location_id' => $inventory->location_id,
+            'user_id' => auth()->id(),
+            'type' => 'count_adjustment',
+            'quantity' => -$inventory->quantity,
+            'notes' => 'Stock record deleted manually.',
+        ]);
+        
+        $inventory->delete();
+        
         Flux::toast(variant: 'success', text: __('Stock record deleted.'));
     }
 

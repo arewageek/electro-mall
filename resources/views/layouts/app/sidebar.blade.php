@@ -39,7 +39,7 @@
                     <flux:sidebar.item icon="qr-code" :href="route('inventory.products')" :current="request()->routeIs('inventory.products')" wire:navigate>
                         {{ __('Products') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="clipboard-document-check" href="#" wire:navigate>
+                    <flux:sidebar.item icon="clipboard-document-check" :href="route('inventory.counts')" :current="request()->routeIs('inventory.counts')" wire:navigate>
                         {{ __('Counts') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
@@ -47,7 +47,7 @@
 
                 @can('location.manage')
                 <flux:sidebar.group :heading="__('Warehouse')" class="grid mt-4">
-                    <flux:sidebar.item icon="map" href="#" wire:navigate>
+                    <flux:sidebar.item icon="map" :href="route('warehouse.locations')" :current="request()->routeIs('warehouse.locations')" wire:navigate>
                         {{ __('Locations') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="truck" :href="route('warehouse.suppliers')" :current="request()->routeIs('warehouse.suppliers')" wire:navigate>
