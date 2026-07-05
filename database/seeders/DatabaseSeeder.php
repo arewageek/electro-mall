@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             LocationSeeder::class,
             ProductSeeder::class,
             InventorySeeder::class,
+            TransactionSeeder::class,
         ]);
     }
 }
