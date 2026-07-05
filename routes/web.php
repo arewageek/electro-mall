@@ -7,6 +7,7 @@ use App\Livewire\Warehouse\LocationManagement;
 use App\Livewire\Inventory\StockManagement;
 use App\Livewire\Inventory\CountManagement;
 use App\Livewire\Operations\ReceivingManagement;
+use App\Livewire\Operations\PickingManagement;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('warehouse/locations', LocationManagement::class)->name('warehouse.locations')->middleware('can:location.manage');
     Route::get('warehouse/suppliers', SupplierManagement::class)->name('warehouse.suppliers')->middleware('can:supplier.manage');
     Route::get('operations/receiving', ReceivingManagement::class)->name('operations.receiving')->middleware('can:shipment.receive');
+    Route::get('operations/picking', PickingManagement::class)->name('operations.picking')->middleware('can:order.pick');
 });
 
 require __DIR__.'/settings.php';

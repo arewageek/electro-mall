@@ -25,7 +25,7 @@
 
                 @can('order.pick')
                 <flux:sidebar.group :heading="__('Fulfillment')" class="grid mt-4">
-                    <flux:sidebar.item icon="arrow-up-tray" href="#" wire:navigate>
+                    <flux:sidebar.item icon="arrow-up-tray" :href="route('operations.picking')" :current="request()->routeIs('operations.picking')" wire:navigate>
                         {{ __('Picking') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
