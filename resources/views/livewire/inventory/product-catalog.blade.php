@@ -55,6 +55,7 @@
 
                             <flux:menu>
                                 <flux:menu.item wire:click="edit('{{ $product->id }}')" icon="pencil">Edit</flux:menu.item>
+                                <flux:menu.item wire:click="printLabel('{{ $product->id }}')" icon="printer">Print Label</flux:menu.item>
                                 <flux:menu.separator />
                                 <flux:menu.item wire:click="delete('{{ $product->id }}')" wire:confirm="Are you sure you want to delete this product?" icon="trash" variant="danger">Delete</flux:menu.item>
                             </flux:menu>
@@ -73,6 +74,7 @@
         {{ $products->links() }}
     </div>
 
+    <!-- Edit/Create Modal -->
     <flux:modal wire:model="show_modal" class="md:w-[600px]">
         <div class="space-y-6">
             <div>
@@ -153,4 +155,70 @@
             </div>
         </div>
     </flux:modal>
+
+    <!-- Print Label Modal -->
+    <flux:modal wire:model="show_print_modal" class="md:w-[500px]">
+        @if($print_product)
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Print Product Label</flux:heading>
+                <flux:subheading>Generate a label for bin placement or individual items.</flux:subheading>
+            </div>
+
+            <div class="p-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center overflow-auto">
+                <!-- The printable area -->
+                <div id="print-label-area" style="background: white; padding: 24px; text-align: center; border: 1px dashed #ccc; width: 350px; font-family: system-ui, sans-serif;">
+                    <div style="font-weight: bold; font-size: 20px; line-height: 1.2; margin-bottom: 4px; color: #000;">
+                        {{ $print_product->name }}
+                    </div>
+                    <div style="font-family: monospace; font-size: 14px; color: #555; margin-bottom: 20px;">
+                        {{ $print_product->sku }}
+                    </div>
+                    
+                    <div style="width: 120px; height: 120px; margin: 0 auto 20px auto;">
+                        <img src="{{ $print_qrcode_svg }}" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;" />
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; max-width: 100%; overflow: hidden;">
+                            {!! $print_barcode_svg !!}
+                        </div>
+                        <div style="font-family: monospace; font-size: 12px; letter-spacing: 2px; margin-top: 6px; color: #333;">
+                            {{ $print_product->barcode }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost">Close</flux:button>
+                </flux:modal.close>
+                <flux:button icon="printer" variant="primary" x-on:click="printElement('print-label-area')">Print</flux:button>
+            </div>
+        </div>
+        @endif
+    </flux:modal>
+
+    @script
+    <script>
+        if (typeof window.printElement === 'undefined') {
+            window.printElement = function(elementId) {
+                const printContent = document.getElementById(elementId).innerHTML;
+                const printWindow = window.open('', '_blank');
+                
+                const html = '<html><head><title>Print Label</title><style>@media print { body { margin: 0; padding: 0; background: white; } @page { margin: 0; size: auto; } }</style></head><body style="margin: 0; padding: 20px; display: flex; justify-content: center; background: white;"><div style="width: 4in; min-height: 3in; box-sizing: border-box; page-break-inside: avoid; border: none !important;">' + printContent + '</div></body></html>';
+                
+                printWindow.document.write(html);
+                printWindow.document.close();
+                
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250);
+            }
+        }
+    </script>
+    @endscript
 </div>

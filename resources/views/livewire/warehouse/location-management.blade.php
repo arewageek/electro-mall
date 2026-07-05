@@ -46,6 +46,7 @@
                                     <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom" />
                                     <flux:menu>
                                         <flux:menu.item icon="pencil-square" wire:click="edit('{{ $location->id }}')">{{ __('Edit') }}</flux:menu.item>
+                                        <flux:menu.item icon="printer" wire:click="printLabel('{{ $location->id }}')">{{ __('Print Label') }}</flux:menu.item>
                                         <flux:menu.separator />
                                         <flux:menu.item icon="trash" class="text-red-600 hover:bg-red-50" wire:click="delete('{{ $location->id }}')" wire:confirm="{{ __('Are you sure you want to delete this location?') }}">{{ __('Delete') }}</flux:menu.item>
                                     </flux:menu>
@@ -116,4 +117,70 @@
             </div>
         </form>
     </flux:modal>
+
+    <!-- Print Label Modal -->
+    <flux:modal wire:model="show_print_modal" class="md:w-[500px]">
+        @if($print_location)
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Print Location Label</flux:heading>
+                <flux:subheading>Generate a label for the physical location.</flux:subheading>
+            </div>
+
+            <div class="p-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center overflow-auto">
+                <!-- The printable area -->
+                <div id="print-location-area" style="background: white; padding: 24px; text-align: center; border: 1px dashed #ccc; width: 350px; font-family: system-ui, sans-serif;">
+                    <div style="font-weight: bold; font-size: 22px; line-height: 1.2; margin-bottom: 2px; color: #000;">
+                        {{ $print_location_name }}
+                    </div>
+                    <div style="font-size: 11px; color: #777; margin-bottom: 16px; letter-spacing: 1px; font-weight: bold; text-transform: uppercase;">
+                        LOCATION
+                    </div>
+                    
+                    <div style="width: 120px; height: 120px; margin: 0 auto 16px auto;">
+                        <img src="{{ $print_qrcode_svg }}" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;" />
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; max-width: 100%; overflow: hidden;">
+                            {!! $print_barcode_svg !!}
+                        </div>
+                        <div style="font-family: monospace; font-size: 12px; letter-spacing: 2px; margin-top: 6px; color: #333;">
+                            {{ $print_location->barcode }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost">Close</flux:button>
+                </flux:modal.close>
+                <flux:button icon="printer" variant="primary" x-on:click="printElement('print-location-area')">Print</flux:button>
+            </div>
+        </div>
+        @endif
+    </flux:modal>
+    
+    @script
+    <!-- Print Script (Global to component) -->
+    <script>
+        // Only define once if not defined by another component
+        if (typeof window.printElement === 'undefined') {
+            window.printElement = function(elementId) {
+                const printContent = document.getElementById(elementId).innerHTML;
+                const printWindow = window.open('', '_blank');
+                const html = '<html><head><title>Print Label</title><style>@media print { body { margin: 0; padding: 0; background: white; } @page { margin: 0; size: auto; } }</style></head><body style="margin: 0; padding: 20px; display: flex; justify-content: center; background: white;"><div style="width: 4in; min-height: 3in; box-sizing: border-box; page-break-inside: avoid; border: none !important;">' + printContent + '</div></body></html>';
+                printWindow.document.write(html);
+                printWindow.document.close();
+                
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250);
+            }
+        }
+    </script>
+    @endscript
 </div>

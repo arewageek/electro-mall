@@ -148,12 +148,25 @@
                             </div>
                             <div class="flex-1">
                                 <div class="text-sm">
-                                    <span class="font-medium">{{ $log->user->name }}</span>
+                                    <span class="font-medium text-zinc-900">{{ $log->user->name }}</span>
                                     <span class="text-zinc-500">
-                                        {{ $log->type === 'receive' ? __('received') : ($log->type === 'pick' ? __('picked') : __('adjusted/moved')) }}
+                                        @if($log->type === 'receive')
+                                            {{ __('received') }} <span class="font-medium text-zinc-700">{{ abs($log->quantity) }}</span> {{ __('units of') }}
+                                        @elseif($log->type === 'pick')
+                                            {{ __('picked') }} <span class="font-medium text-zinc-700">{{ abs($log->quantity) }}</span> {{ __('units of') }}
+                                        @elseif($log->type === 'count')
+                                            {{ __('counted') }} <span class="font-medium text-zinc-700">{{ abs($log->quantity) }}</span> {{ __('units of') }}
+                                        @else
+                                            {{ $log->quantity > 0 ? __('added') : __('removed') }} <span class="font-medium text-zinc-700">{{ abs($log->quantity) }}</span> {{ __('units of') }}
+                                        @endif
                                     </span>
-                                    <span class="font-medium">{{ abs($log->quantity) }}x</span>
-                                    <span class="text-zinc-500">{{ $log->product->name }}</span>
+                                    <span class="font-medium text-zinc-900">{{ $log->product->name }}</span>
+                                    @if($log->location)
+                                    <span class="text-zinc-500">
+                                        {{ $log->type === 'pick' || $log->quantity < 0 ? __('from') : __('at') }}
+                                        <span class="font-medium text-zinc-700">{{ implode('/', array_filter([$log->location->zone, $log->location->aisle, $log->location->rack, $log->location->shelf, $log->location->bin])) }}</span>
+                                    </span>
+                                    @endif
                                 </div>
                                 <div class="text-xs text-zinc-400 mt-0.5">
                                     {{ $log->created_at->diffForHumans() }}

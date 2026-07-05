@@ -34,9 +34,9 @@ class Dashboard extends Component
         })->sortBy('total_qty')->take(5);
 
         // Recent activity
-        $recent_transactions = Transaction::with(['product', 'user'])
+        $recent_transactions = Transaction::with(['product', 'user', 'location'])
             ->latest()
-            ->take(5)
+            ->take(8)
             ->get();
 
         return view('livewire.dashboard', [

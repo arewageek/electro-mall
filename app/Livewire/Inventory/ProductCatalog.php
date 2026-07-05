@@ -27,6 +27,11 @@ class ProductCatalog extends Component
 
     public $is_editing = false;
     public $show_modal = false;
+    
+    public $show_print_modal = false;
+    public $print_product = null;
+    public $print_barcode_svg = '';
+    public $print_qrcode_svg = '';
 
     public function rules()
     {
@@ -39,6 +44,32 @@ class ProductCatalog extends Component
             'description' => ['nullable', 'string'],
             'unit_price' => ['required', 'numeric', 'min:0'],
         ];
+    }
+
+    public function printLabel($id)
+    {
+        $product = Product::findOrFail($id);
+        
+        if (empty($product->barcode)) {
+            Flux::toast(variant: 'warning', text: __('This product does not have a barcode. Please edit and generate one first.'));
+            return;
+        }
+        
+        $this->print_product = $product;
+        
+        // Generate 1D Barcode (CODE128)
+        $generator = new \Picqer\Barcode\BarcodeGeneratorSVG();
+        $this->print_barcode_svg = $generator->getBarcode($product->barcode, $generator::TYPE_CODE_128, 2, 60);
+
+        // Generate QR Code
+        $options = new \chillerlan\QRCode\QROptions([
+            'outputInterface' => \chillerlan\QRCode\Output\QRMarkupSVG::class,
+            'eccLevel'   => \chillerlan\QRCode\Common\EccLevel::L,
+            'addQuietzone' => false,
+        ]);
+        $this->print_qrcode_svg = (new \chillerlan\QRCode\QRCode($options))->render($product->barcode);
+
+        $this->show_print_modal = true;
     }
 
     public function create()
