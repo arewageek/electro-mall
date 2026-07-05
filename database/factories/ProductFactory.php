@@ -19,11 +19,11 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
-        $name = fake()->unique()->words(3, true);
+        $name = ucwords(fake()->words(3, true));
 
         return [
-            'category_id' => Category::inRandomOrder()->first()?->id ?? Category::factory(),
-            'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
+            'category_id' => Category::inRandomOrder()->value('id') ?? Category::factory(),
+            'supplier_id' => Supplier::inRandomOrder()->value('id') ?? Supplier::factory(),
             'name' => ucwords($name),
             'slug' => str()->slug($name),
             'sku' => 'SKU-'.strtoupper(fake()->bothify('??####')),

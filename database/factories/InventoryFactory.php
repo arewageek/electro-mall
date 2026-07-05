@@ -20,8 +20,8 @@ class InventoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
-            'location_id' => Location::inRandomOrder()->first()?->id ?? Location::factory(),
+            'product_id' => Product::inRandomOrder()->value('id') ?? Product::factory(),
+            'location_id' => Location::inRandomOrder()->value('id') ?? Location::factory(),
             'quantity' => fake()->numberBetween(0, 500),
         ];
     }

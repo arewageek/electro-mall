@@ -24,9 +24,9 @@ class TransactionFactory extends Factory
         $quantity = ($type === 'pick') ? fake()->numberBetween(-100, -1) : fake()->numberBetween(1, 100);
 
         return [
-            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
-            'location_id' => Location::inRandomOrder()->first()?->id ?? Location::factory(),
-            'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'product_id' => Product::inRandomOrder()->value('id') ?? Product::factory(),
+            'location_id' => Location::inRandomOrder()->value('id') ?? Location::factory(),
+            'user_id' => User::inRandomOrder()->value('id') ?? User::factory(),
             'type' => $type,
             'quantity' => $quantity,
             'reference' => strtoupper(fake()->bothify('REF-####??')),

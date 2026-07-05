@@ -20,8 +20,8 @@ class OrderItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'order_id' => Order::inRandomOrder()->first()?->id ?? Order::factory(),
-            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
+            'order_id' => Order::inRandomOrder()->value('id') ?? Order::factory(),
+            'product_id' => Product::inRandomOrder()->value('id') ?? Product::factory(),
             'quantity' => fake()->numberBetween(1, 10),
             'unit_price' => fake()->randomFloat(2, 10, 2000),
         ];
