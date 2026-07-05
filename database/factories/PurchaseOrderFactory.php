@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<PurchaseOrder>
  */
+use App\Models\Supplier;
+use App\Models\User;
+
 class PurchaseOrderFactory extends Factory
 {
     /**
@@ -18,7 +21,12 @@ class PurchaseOrderFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'supplier_id' => Supplier::inRandomOrder()->first()?->id ?? Supplier::factory(),
+            'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'po_number' => 'PO-' . fake()->unique()->bothify('########-????'),
+            'status' => fake()->randomElement(['draft', 'submitted', 'partially_received', 'received', 'cancelled']),
+            'expected_delivery_date' => fake()->dateTimeBetween('now', '+1 month'),
+            'notes' => fake()->optional()->sentence(),
         ];
     }
 }

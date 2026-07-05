@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('purchase_orders', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('supplier_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete(); // Admin who created it
+            $table->string('po_number')->unique();
+            $table->enum('status', ['draft', 'submitted', 'partially_received', 'received', 'cancelled'])->default('draft');
+            $table->date('expected_delivery_date')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

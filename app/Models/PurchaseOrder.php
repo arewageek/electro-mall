@@ -5,8 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class PurchaseOrder extends Model
 {
-    /** @use HasFactory<\Database\Factories\PurchaseOrderFactory> */
-    use HasFactory;
+    use HasFactory, HasUuids;
+
+    protected $fillable = [
+        'supplier_id',
+        'user_id',
+        'po_number',
+        'status',
+        'expected_delivery_date',
+        'notes',
+    ];
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class);
+    }
 }
