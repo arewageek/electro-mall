@@ -24,7 +24,7 @@ class ReceivingManagement extends Component
     public $supplier_id = '';
     public $expected_delivery_date = '';
     public $notes = '';
-    public $po_items = []; // [['product_id' => '', 'quantity' => 1, 'price' => 0]]
+    public $po_items = []; // [['product_id' => '', 'product_barcode' => '', 'product_name' => '', 'quantity' => 1, 'price' => 0]]
 
     // Receive Modal State
     public $show_receive_modal = false;
@@ -39,7 +39,24 @@ class ReceivingManagement extends Component
 
     public function addPoItem()
     {
-        $this->po_items[] = ['product_id' => '', 'quantity' => 1, 'price' => 0];
+        $this->po_items[] = ['product_id' => '', 'product_barcode' => '', 'product_name' => '', 'quantity' => 1, 'price' => 0];
+    }
+
+    public function resolveProduct($index)
+    {
+        $barcode = $this->po_items[$index]['product_barcode'] ?? '';
+        if (empty($barcode)) return;
+
+        $product = Product::where('barcode', $barcode)->orWhere('sku', $barcode)->first();
+        if ($product) {
+            $this->po_items[$index]['product_id'] = $product->id;
+            $this->po_items[$index]['product_name'] = $product->name . ' (' . $product->sku . ')';
+            $this->resetErrorBag("po_items.{$index}.product_barcode");
+        } else {
+            $this->po_items[$index]['product_id'] = '';
+            $this->po_items[$index]['product_name'] = '';
+            $this->addError("po_items.{$index}.product_barcode", __('Invalid product barcode.'));
+        }
     }
 
     public function removePoItem($index)
@@ -103,11 +120,14 @@ class ReceivingManagement extends Component
                 $this->receive_items[] = [
                     'item_id' => $item->id,
                     'product_id' => $item->product_id,
+                    'product_barcode' => $item->product->barcode,
                     'product_name' => $item->product->name . ' (' . $item->product->sku . ')',
                     'ordered' => $item->quantity_ordered,
                     'received_so_far' => $item->quantity_received,
                     'receiving_now' => 0,
                     'location_id' => '',
+                    'location_barcode' => '',
+                    'location_name' => '',
                 ];
             }
         }
@@ -120,6 +140,23 @@ class ReceivingManagement extends Component
         $this->show_receive_modal = true;
     }
 
+    public function resolveLocation($index)
+    {
+        $barcode = $this->receive_items[$index]['location_barcode'] ?? '';
+        if (empty($barcode)) return;
+
+        $location = Location::where('barcode', $barcode)->first();
+        if ($location) {
+            $this->receive_items[$index]['location_id'] = $location->id;
+            $this->receive_items[$index]['location_name'] = implode(' / ', array_filter([$location->zone, $location->aisle, $location->rack, $location->shelf, $location->bin]));
+            $this->resetErrorBag("receive_items.{$index}.location_barcode");
+        } else {
+            $this->receive_items[$index]['location_id'] = '';
+            $this->receive_items[$index]['location_name'] = '';
+            $this->addError("receive_items.{$index}.location_barcode", __('Invalid location barcode.'));
+        }
+    }
+
     public function saveReceive()
     {
         $this->validate([
@@ -128,7 +165,7 @@ class ReceivingManagement extends Component
 
         foreach ($this->receive_items as $index => $rItem) {
             if ($rItem['receiving_now'] > 0 && empty($rItem['location_id'])) {
-                $this->addError("receive_items.{$index}.location_id", __('You must select a location when receiving an item.'));
+                $this->addError("receive_items.{$index}.location_barcode", __('You must scan or enter a valid location barcode.'));
                 return;
             }
         }
@@ -210,8 +247,6 @@ class ReceivingManagement extends Component
         return view('livewire.operations.receiving-management', [
             'purchase_orders' => $purchase_orders,
             'suppliers' => Supplier::orderBy('name')->get(),
-            'products' => Product::orderBy('name')->get(),
-            'locations' => Location::orderBy('zone')->orderBy('aisle')->orderBy('rack')->get(),
         ])->layout('layouts.app');
     }
 }

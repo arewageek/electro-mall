@@ -101,13 +101,16 @@
                     @foreach($order_items as $index => $item)
                         <div class="flex flex-col md:flex-row gap-3 items-end bg-white border border-zinc-100 p-3 rounded-lg shadow-sm">
                             <flux:field class="flex-1 w-full">
-                                <flux:label class="text-xs">{{ __('Product') }}</flux:label>
-                                <flux:select wire:model="order_items.{{ $index }}.product_id" placeholder="{{ __('Select product...') }}">
-                                    @foreach($products as $product)
-                                        <flux:select.option value="{{ $product->id }}">{{ $product->name }} ({{ $product->sku }})</flux:select.option>
-                                    @endforeach
-                                </flux:select>
-                                <flux:error name="order_items.{{ $index }}.product_id" />
+                                <flux:label class="text-xs">{{ __('Product (Scan Barcode)') }}</flux:label>
+                                <div class="flex gap-2 items-center">
+                                    <flux:input wire:model="order_items.{{ $index }}.product_barcode" wire:keydown.enter.prevent="resolveProduct({{ $index }})" placeholder="{{ __('Scan or type barcode & hit Enter') }}" />
+                                </div>
+                                @if(!empty($item['product_name']))
+                                    <div class="text-xs text-green-600 mt-1 font-medium flex items-center gap-1">
+                                        <flux:icon.check-circle class="w-3 h-3" /> {{ $item['product_name'] }}
+                                    </div>
+                                @endif
+                                <flux:error name="order_items.{{ $index }}.product_barcode" />
                             </flux:field>
                             
                             <flux:field class="w-full md:w-32">
@@ -158,22 +161,34 @@
                         </div>
                         
                         <flux:field>
-                            <flux:label>{{ __('Pick from Location') }}</flux:label>
+                            <flux:label>{{ __('Pick from Location (Scan Barcode)') }}</flux:label>
+                            
+                            <div class="flex gap-2 items-center mb-2">
+                                <flux:input wire:model="pick_items.{{ $index }}.location_barcode" wire:keydown.enter.prevent="resolveLocation({{ $index }})" placeholder="{{ __('Scan location barcode...') }}" />
+                            </div>
+                            
+                            @if(!empty($item['location_name']))
+                                <div class="text-xs text-green-600 font-medium flex items-center gap-1 mb-2">
+                                    <flux:icon.check-circle class="w-3 h-3" /> {{ $item['location_name'] }}
+                                </div>
+                            @endif
+
                             @if(count($item['locations']) > 0)
-                                <flux:select wire:model="pick_items.{{ $index }}.selected_location_id" placeholder="{{ __('Scan or select location...') }}">
-                                    @foreach($item['locations'] as $loc)
-                                        <flux:select.option value="{{ $loc['id'] }}">
-                                            {{ $loc['name'] }}
-                                        </flux:select.option>
-                                    @endforeach
-                                </flux:select>
+                                <div class="text-xs text-zinc-500">
+                                    {{ __('Available at:') }}
+                                    <ul class="list-disc pl-4 mt-1">
+                                        @foreach($item['locations'] as $loc)
+                                            <li>{{ $loc['name'] }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             @else
-                                <div class="text-red-600 text-sm py-2 px-3 bg-red-50 rounded-md border border-red-100 flex items-center gap-2">
+                                <div class="text-red-600 text-sm py-2 px-3 bg-red-50 rounded-md border border-red-100 flex items-center gap-2 mt-2">
                                     <flux:icon.exclamation-triangle class="w-4 h-4" />
                                     {{ __('Out of Stock across all locations.') }}
                                 </div>
                             @endif
-                            <flux:error name="pick_items.{{ $index }}.selected_location_id" />
+                            <flux:error name="pick_items.{{ $index }}.location_barcode" />
                         </flux:field>
                     </div>
                 @endforeach

@@ -22,7 +22,7 @@ class PickingManagement extends Component
     public $customer_name = '';
     public $customer_email = '';
     public $shipping_address = '';
-    public $order_items = []; // [['product_id' => '', 'quantity' => 1, 'price' => 0]]
+    public $order_items = []; // [['product_id' => '', 'product_barcode' => '', 'product_name' => '', 'quantity' => 1, 'price' => 0]]
 
     // Pick Order Modal State
     public $show_pick_modal = false;
@@ -37,7 +37,24 @@ class PickingManagement extends Component
 
     public function addOrderItem()
     {
-        $this->order_items[] = ['product_id' => '', 'quantity' => 1, 'price' => 0];
+        $this->order_items[] = ['product_id' => '', 'product_barcode' => '', 'product_name' => '', 'quantity' => 1, 'price' => 0];
+    }
+
+    public function resolveProduct($index)
+    {
+        $barcode = $this->order_items[$index]['product_barcode'] ?? '';
+        if (empty($barcode)) return;
+
+        $product = Product::where('barcode', $barcode)->orWhere('sku', $barcode)->first();
+        if ($product) {
+            $this->order_items[$index]['product_id'] = $product->id;
+            $this->order_items[$index]['product_name'] = $product->name . ' (' . $product->sku . ')';
+            $this->resetErrorBag("order_items.{$index}.product_barcode");
+        } else {
+            $this->order_items[$index]['product_id'] = '';
+            $this->order_items[$index]['product_name'] = '';
+            $this->addError("order_items.{$index}.product_barcode", __('Invalid product barcode.'));
+        }
     }
 
     public function removeOrderItem($index)
@@ -121,19 +138,47 @@ class PickingManagement extends Component
                 'quantity' => $item->quantity,
                 'locations' => $inventory_locations,
                 'selected_location_id' => '',
+                'location_barcode' => '',
+                'location_name' => '',
             ];
         }
 
         $this->show_pick_modal = true;
     }
 
+    public function resolveLocation($index)
+    {
+        $barcode = $this->pick_items[$index]['location_barcode'] ?? '';
+        if (empty($barcode)) return;
+
+        $location = \App\Models\Location::where('barcode', $barcode)->first();
+        if ($location) {
+            $has_inventory = collect($this->pick_items[$index]['locations'])->contains('id', $location->id);
+            
+            if ($has_inventory) {
+                $this->pick_items[$index]['selected_location_id'] = $location->id;
+                $this->pick_items[$index]['location_name'] = implode(' / ', array_filter([$location->zone, $location->aisle, $location->rack, $location->shelf, $location->bin]));
+                $this->resetErrorBag("pick_items.{$index}.location_barcode");
+            } else {
+                $this->pick_items[$index]['selected_location_id'] = '';
+                $this->pick_items[$index]['location_name'] = '';
+                $this->addError("pick_items.{$index}.location_barcode", __('This location does not have stock for this item.'));
+            }
+        } else {
+            $this->pick_items[$index]['selected_location_id'] = '';
+            $this->pick_items[$index]['location_name'] = '';
+            $this->addError("pick_items.{$index}.location_barcode", __('Invalid location barcode.'));
+        }
+    }
+
     public function savePick()
     {
-        $this->validate([
-            'pick_items.*.selected_location_id' => ['required'],
-        ], [
-            'pick_items.*.selected_location_id.required' => 'You must select a location to pick each item from.',
-        ]);
+        foreach ($this->pick_items as $index => $pItem) {
+            if (empty($pItem['selected_location_id'])) {
+                $this->addError("pick_items.{$index}.location_barcode", __('You must scan or enter a valid location barcode.'));
+                return;
+            }
+        }
 
         $order = Order::findOrFail($this->picking_order_id);
 
@@ -195,7 +240,6 @@ class PickingManagement extends Component
 
         return view('livewire.operations.picking-management', [
             'orders' => $orders,
-            'products' => Product::orderBy('name')->get(),
         ])->layout('layouts.app');
     }
 }

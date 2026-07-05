@@ -4,8 +4,9 @@
             <flux:heading size="xl" level="1">{{ __('Inventory Counts') }}</flux:heading>
             <flux:subheading>{{ __('Reconcile physical inventory against expected system quantities.') }}</flux:subheading>
         </div>
-        <div class="w-full md:w-auto">
+        <div class="w-full md:w-auto flex gap-3">
             <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Search inventory...') }}" class="w-full md:w-64" />
+            <flux:button variant="primary" wire:click="openScanner" icon="qr-code" class="shrink-0">{{ __('Scanner Count') }}</flux:button>
         </div>
     </div>
 
@@ -98,6 +99,69 @@
                     <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
                 </flux:modal.close>
                 <flux:button type="submit" variant="primary">{{ __('Submit Count') }}</flux:button>
+            </div>
+        </form>
+    </flux:modal>
+
+    <!-- Scanner Count Modal -->
+    <flux:modal wire:model="show_scanner_modal" :heading="__('Scanner Cycle Count')" class="md:w-[600px]">
+        <form wire:submit="saveScannerCount" class="space-y-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <flux:field>
+                    <flux:label>{{ __('1. Scan Location') }}</flux:label>
+                    <flux:input wire:model="scan_location_barcode" wire:keydown.enter.prevent="resolveScanLocation" placeholder="{{ __('Location Barcode...') }}" autofocus />
+                    @if($scanned_location_name)
+                        <div class="text-xs text-green-600 font-medium flex items-center gap-1 mt-1">
+                            <flux:icon.check-circle class="w-3 h-3" /> {{ $scanned_location_name }}
+                        </div>
+                    @endif
+                    <flux:error name="scan_location_barcode" />
+                    <flux:error name="scanned_location_id" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('2. Scan Product') }}</flux:label>
+                    <flux:input wire:model="scan_product_barcode" wire:keydown.enter.prevent="resolveScanProduct" placeholder="{{ __('Product Barcode...') }}" />
+                    @if($scanned_product_name)
+                        <div class="text-xs text-green-600 font-medium flex items-center gap-1 mt-1">
+                            <flux:icon.check-circle class="w-3 h-3" /> {{ $scanned_product_name }}
+                        </div>
+                    @endif
+                    <flux:error name="scan_product_barcode" />
+                    <flux:error name="scanned_product_id" />
+                </flux:field>
+            </div>
+
+            @if($scanned_location_id && $scanned_product_id)
+                <div class="bg-zinc-50 rounded-lg p-4 flex justify-between items-center border border-zinc-200">
+                    <span class="font-medium text-zinc-700">{{ __('Expected System Quantity:') }}</span>
+                    <flux:badge size="lg" color="zinc">{{ number_format($scanned_expected_quantity) }}</flux:badge>
+                </div>
+
+                <flux:field>
+                    <flux:label>{{ __('3. Enter Physical Count') }}</flux:label>
+                    <flux:input wire:model="counted_quantity" type="number" min="0" placeholder="0" class="text-lg font-bold" />
+                    <flux:error name="counted_quantity" />
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Notes (Optional)') }}</flux:label>
+                    <flux:textarea wire:model="notes" rows="2" placeholder="{{ __('Reason for discrepancy...') }}" />
+                    <flux:error name="notes" />
+                </flux:field>
+            @else
+                <div class="p-6 text-center text-zinc-500 border border-dashed border-zinc-300 rounded-lg bg-zinc-50/50">
+                    <flux:icon.qr-code class="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p>{{ __('Please scan both a location and a product to begin counting.') }}</p>
+                </div>
+            @endif
+
+            <div class="flex justify-end gap-3">
+                <flux:modal.close>
+                    <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" :disabled="!$scanned_location_id || !$scanned_product_id">{{ __('Submit Count') }}</flux:button>
             </div>
         </form>
     </flux:modal>

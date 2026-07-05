@@ -20,15 +20,23 @@ class CountManagement extends Component
     public $expected_quantity = 0;
     
     public $counted_quantity = '';
-    public $notes = '';
-
     public $show_modal = false;
+
+    // Scanner Workflow State
+    public $show_scanner_modal = false;
+    public $scan_location_barcode = '';
+    public $scan_product_barcode = '';
+    public $scanned_location_id = null;
+    public $scanned_product_id = null;
+    public $scanned_product_name = '';
+    public $scanned_location_name = '';
+    public $scanned_expected_quantity = 0;
 
     public function rules()
     {
         return [
             'counted_quantity' => ['required', 'numeric', 'min:0'],
-            'notes' => ['required', 'string', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -80,6 +88,109 @@ class CountManagement extends Component
         
         $this->show_modal = false;
         $this->reset(['inventory_id', 'product_name', 'location_name', 'expected_quantity', 'counted_quantity', 'notes']);
+    }
+
+    public function openScanner()
+    {
+        $this->reset(['scan_location_barcode', 'scan_product_barcode', 'scanned_location_id', 'scanned_product_id', 'scanned_product_name', 'scanned_location_name', 'scanned_expected_quantity', 'counted_quantity', 'notes', 'inventory_id']);
+        $this->show_scanner_modal = true;
+    }
+
+    public function resolveScanLocation()
+    {
+        $barcode = $this->scan_location_barcode;
+        if (empty($barcode)) return;
+
+        $location = \App\Models\Location::where('barcode', $barcode)->first();
+        if ($location) {
+            $this->scanned_location_id = $location->id;
+            $this->scanned_location_name = implode(' / ', array_filter([$location->zone, $location->aisle, $location->rack, $location->shelf, $location->bin]));
+            $this->resetErrorBag('scan_location_barcode');
+            $this->checkScannedInventory();
+        } else {
+            $this->addError('scan_location_barcode', __('Invalid location barcode.'));
+            $this->scanned_location_id = null;
+            $this->scanned_location_name = '';
+        }
+    }
+
+    public function resolveScanProduct()
+    {
+        $barcode = $this->scan_product_barcode;
+        if (empty($barcode)) return;
+
+        $product = \App\Models\Product::where('barcode', $barcode)->orWhere('sku', $barcode)->first();
+        if ($product) {
+            $this->scanned_product_id = $product->id;
+            $this->scanned_product_name = $product->name . ' (' . $product->sku . ')';
+            $this->resetErrorBag('scan_product_barcode');
+            $this->checkScannedInventory();
+        } else {
+            $this->addError('scan_product_barcode', __('Invalid product barcode.'));
+            $this->scanned_product_id = null;
+            $this->scanned_product_name = '';
+        }
+    }
+
+    public function checkScannedInventory()
+    {
+        if ($this->scanned_location_id && $this->scanned_product_id) {
+            $inventory = Inventory::where('location_id', $this->scanned_location_id)
+                ->where('product_id', $this->scanned_product_id)
+                ->first();
+                
+            if ($inventory) {
+                $this->inventory_id = $inventory->id;
+                $this->scanned_expected_quantity = $inventory->quantity;
+            } else {
+                $this->inventory_id = null;
+                $this->scanned_expected_quantity = 0;
+            }
+        }
+    }
+
+    public function saveScannerCount()
+    {
+        $this->validate([
+            'counted_quantity' => ['required', 'numeric', 'min:0'],
+            'notes' => ['nullable', 'string', 'max:255'],
+            'scanned_location_id' => ['required'],
+            'scanned_product_id' => ['required'],
+        ], [
+            'scanned_location_id.required' => 'You must scan a valid location.',
+            'scanned_product_id.required' => 'You must scan a valid product.'
+        ]);
+
+        $diff = $this->counted_quantity - $this->scanned_expected_quantity;
+
+        if ($diff == 0) {
+            Flux::toast(variant: 'success', text: __('Count matches expected quantity. No adjustment needed.'));
+            $this->show_scanner_modal = false;
+            return;
+        }
+
+        if ($this->inventory_id) {
+            $inventory = Inventory::find($this->inventory_id);
+            $inventory->update(['quantity' => $this->counted_quantity]);
+        } else {
+            $inventory = Inventory::create([
+                'product_id' => $this->scanned_product_id,
+                'location_id' => $this->scanned_location_id,
+                'quantity' => $this->counted_quantity
+            ]);
+        }
+
+        Transaction::create([
+            'product_id' => $inventory->product_id,
+            'location_id' => $inventory->location_id,
+            'user_id' => auth()->id(),
+            'type' => 'count_adjustment',
+            'quantity' => $diff,
+            'notes' => 'Cycle Count Reconcilation: ' . ($this->notes ?: 'Scanner Count'),
+        ]);
+
+        Flux::toast(variant: 'success', text: __('Inventory count reconciled and adjusted.'));
+        $this->show_scanner_modal = false;
     }
 
     public function updatedSearch()
