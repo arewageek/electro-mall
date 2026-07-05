@@ -36,7 +36,7 @@
                     <flux:sidebar.item icon="queue-list" href="#" wire:navigate>
                         {{ __('Stock') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="qr-code" href="#" wire:navigate>
+                    <flux:sidebar.item icon="qr-code" :href="route('inventory.products')" :current="request()->routeIs('inventory.products')" wire:navigate>
                         {{ __('Products') }}
                     </flux:sidebar.item>
                     <flux:sidebar.item icon="clipboard-document-check" href="#" wire:navigate>
