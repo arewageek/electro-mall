@@ -4,8 +4,8 @@
             <flux:heading size="xl" level="1">{{ __('Variance Approvals') }}</flux:heading>
             <flux:subheading>{{ __('Review cycle count discrepancies and authorize inventory adjustments.') }}</flux:subheading>
         </div>
-        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto items-center">
-            <flux:select wire:model.live="statusFilter" class="w-32">
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <flux:select wire:model.live="statusFilter" class="w-full sm:w-32 shrink-0">
                 <flux:select.option value="pending">Pending</flux:select.option>
                 <flux:select.option value="approved">Approved</flux:select.option>
                 <flux:select.option value="rejected">Rejected</flux:select.option>

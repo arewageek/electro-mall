@@ -115,9 +115,9 @@
         </style>
 
         <!-- Fast Scanner UI -->
-        <div class="fixed inset-0 bg-white z-50 flex flex-col p-6 overflow-y-auto">
-            <div class="flex justify-between items-center mb-6 border-b pb-4">
-                <div class="flex items-center gap-3">
+        <div class="fixed inset-0 bg-white z-50 flex flex-col p-4 md:p-6 overflow-y-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b pb-4 gap-4">
+                <div class="flex items-center gap-3 w-full md:w-auto">
                     <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
                         <flux:icon.qr-code class="w-6 h-6" />
                     </div>
@@ -126,7 +126,7 @@
                         <p class="text-zinc-500">Scan via hardware gun, or use your device camera.</p>
                     </div>
                 </div>
-                <div class="flex gap-3">
+                <div class="flex flex-wrap gap-3 w-full md:w-auto">
                     <template x-if="!cameraActive">
                         <flux:button variant="primary" icon="camera" x-on:click="startCamera()">Start Camera</flux:button>
                     </template>
@@ -205,9 +205,9 @@
                 <flux:heading size="xl" level="1">{{ __('Inventory Counts') }}</flux:heading>
                 <flux:subheading>{{ __('Reconcile physical inventory against expected system quantities.') }}</flux:subheading>
             </div>
-            <div class="w-full md:w-auto flex gap-3">
+            <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3">
                 <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Search inventory...') }}" class="w-full md:w-64" />
-                <flux:button variant="primary" wire:click="toggleScannerMode" icon="qr-code" class="shrink-0">{{ __('Continuous Scanner Mode') }}</flux:button>
+                <flux:button variant="primary" wire:click="toggleScannerMode" icon="qr-code" class="shrink-0 w-full sm:w-auto">{{ __('Continuous Scanner Mode') }}</flux:button>
             </div>
         </div>
 
