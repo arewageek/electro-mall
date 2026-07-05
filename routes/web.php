@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('admin/logs', TransactionLogs::class)->name('admin.logs')->middleware('can:user.manage'); // Adjust permission if needed
     Route::get('inventory/products', ProductCatalog::class)->name('inventory.products')->middleware('can:product.manage');
     Route::get('inventory/stock', StockManagement::class)->name('inventory.stock')->middleware('can:inventory.view');
-    Route::get('inventory/counts', CountManagement::class)->name('inventory.counts')->middleware('can:inventory.view');
+    Route::get('inventory/counts', CountManagement::class)->name('inventory.counts')->middleware('can:inventory.count');
     Route::get('inventory/approvals', ApprovalManagement::class)->name('inventory.approvals')->middleware('can:variance.approve');
     Route::get('warehouse/locations', LocationManagement::class)->name('warehouse.locations')->middleware('can:location.manage');
     Route::get('warehouse/labels', LabelManagement::class)->name('warehouse.labels')->middleware('can:location.manage');

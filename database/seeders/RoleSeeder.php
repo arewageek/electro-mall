@@ -35,6 +35,7 @@ class RoleSeeder extends Seeder
             'dashboard.view',
             'inventory.view',
             'inventory.update',
+            'inventory.count',
             'shipment.receive',
             'transaction.view',
         ]);
@@ -48,6 +49,7 @@ class RoleSeeder extends Seeder
             'product.manage',
             'inventory.view',
             'inventory.update',
+            'inventory.count',
             'variance.approve',
             'report.view',
             'transaction.view',

@@ -39,9 +39,11 @@
                     <flux:sidebar.item icon="qr-code" :href="route('inventory.products')" :current="request()->routeIs('inventory.products')" wire:navigate>
                         {{ __('Products') }}
                     </flux:sidebar.item>
+                    @can('inventory.count')
                     <flux:sidebar.item icon="clipboard-document-check" :href="route('inventory.counts')" :current="request()->routeIs('inventory.counts')" wire:navigate>
                         {{ __('Counts') }}
                     </flux:sidebar.item>
+                    @endcan
                     @can('variance.approve')
                     <flux:sidebar.item icon="shield-exclamation" :href="route('inventory.approvals')" :current="request()->routeIs('inventory.approvals')" wire:navigate>
                         {{ __('Approvals') }}
