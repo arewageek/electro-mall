@@ -1,13 +1,13 @@
 <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <flux:heading size="xl">Product Catalog</flux:heading>
             <flux:subheading>Manage inventory items, SKUs, and categories.</flux:subheading>
         </div>
         
-        <div class="flex gap-4">
-            <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Search products, SKU, or barcode..." class="w-72" />
-            <flux:button wire:click="create" variant="primary" icon="plus">Add Product</flux:button>
+        <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="Search products, SKU, or barcode..." class="w-full sm:w-72" />
+            <flux:button wire:click="create" variant="primary" icon="plus" class="w-full sm:w-auto">Add Product</flux:button>
         </div>
     </div>
 

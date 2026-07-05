@@ -50,7 +50,7 @@
                     <flux:sidebar.item icon="map" href="#" wire:navigate>
                         {{ __('Locations') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="truck" href="#" wire:navigate>
+                    <flux:sidebar.item icon="truck" :href="route('warehouse.suppliers')" :current="request()->routeIs('warehouse.suppliers')" wire:navigate>
                         {{ __('Suppliers') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
