@@ -61,7 +61,7 @@
                     <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
                         {{ __('Users') }}
                     </flux:sidebar.item>
-                    <flux:sidebar.item icon="shield-check" href="#" wire:navigate>
+                    <flux:sidebar.item icon="shield-check" :href="route('admin.logs')" :current="request()->routeIs('admin.logs')" wire:navigate>
                         {{ __('Logs') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
