@@ -19,7 +19,7 @@ class InventorySeeder extends Seeder
         $products = Product::all();
         $locations = Location::all();
 
-        if ($products->isEmpty() || $locations->isEmpty()) {
+        if (Inventory::count() > 0 || $products->isEmpty() || $locations->isEmpty()) {
             return;
         }
 

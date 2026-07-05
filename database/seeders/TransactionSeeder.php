@@ -14,7 +14,9 @@ class TransactionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Generate a history of 200 warehouse transactions
-        Transaction::factory(200)->create();
+        // Generate a history of 200 warehouse transactions if none exist
+        if (Transaction::count() === 0) {
+            Transaction::factory(200)->create();
+        }
     }
 }
