@@ -4,8 +4,6 @@ namespace App\Livewire\Warehouse;
 
 use App\Models\Location;
 use App\Models\Product;
-use chillerlan\QRCode\QRCode;
-use chillerlan\QRCode\QROptions;
 use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,20 +17,13 @@ class LabelManagement extends Component
 
     public $type = 'product'; // 'product' or 'location'
 
-    public $format = 'barcode'; // 'barcode' or 'qrcode'
-
     public $show_print_modal = false;
 
     public $selected_items = [];
 
     public $print_labels = [];
 
-    // Generate label for a single item
-    public function generateLabel($id)
-    {
-        $this->print_labels = [$this->buildLabelData($id)];
-        $this->show_print_modal = true;
-    }
+
 
     // Bulk generate labels
     public function generateBulkLabels()
@@ -47,7 +38,7 @@ class LabelManagement extends Component
         foreach ($this->selected_items as $id) {
             $this->print_labels[] = $this->buildLabelData($id);
         }
-        $this->show_print_modal = true;
+        Flux::modal('print-modal')->show();
     }
 
     private function buildLabelData($id)
@@ -64,21 +55,11 @@ class LabelManagement extends Component
             $subtitle = 'Location';
         }
 
-        if ($this->format === 'barcode') {
-            $generator = new BarcodeGeneratorPNG;
-            try {
-                $image = 'data:image/png;base64,'.base64_encode($generator->getBarcode($text, $generator::TYPE_CODE_128, 2, 60));
-            } catch (\Exception $e) {
-                $image = null;
-            }
-        } else {
-            $options = new QROptions([
-                'version' => 5,
-                'outputType' => QRCode::OUTPUT_MARKUP_SVG,
-                'eccLevel' => QRCode::ECC_L,
-            ]);
-            $qrcode = new QRCode($options);
-            $image = $qrcode->render($text); // This returns inline SVG
+        $generator = new BarcodeGeneratorPNG;
+        try {
+            $image = 'data:image/png;base64,'.base64_encode($generator->getBarcode($text, $generator::TYPE_CODE_128, 2, 60));
+        } catch (\Exception $e) {
+            $image = null;
         }
 
         return [

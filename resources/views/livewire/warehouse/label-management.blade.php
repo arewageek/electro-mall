@@ -10,11 +10,6 @@
                 <flux:select.option value="location">Locations</flux:select.option>
             </flux:select>
             
-            <flux:select wire:model.live="format" class="w-32">
-                <flux:select.option value="barcode">1D Barcode</flux:select.option>
-                <flux:select.option value="qrcode">2D QR Code</flux:select.option>
-            </flux:select>
-            
             <flux:input wire:model.live.debounce.300ms="search" icon="magnifying-glass" placeholder="{{ __('Search...') }}" class="w-full md:w-64" />
         </div>
     </div>
@@ -37,7 +32,6 @@
                     <flux:table.column class="w-10"></flux:table.column>
                     <flux:table.column>{{ $type === 'product' ? __('Product Name') : __('Location Path') }}</flux:table.column>
                     <flux:table.column>{{ __('Barcode Code') }}</flux:table.column>
-                    <flux:table.column>{{ __('Actions') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -46,9 +40,9 @@
                             $text = $type === 'product' ? ($item->barcode ?: $item->sku) : $item->barcode;
                             $title = $type === 'product' ? $item->name : implode(' / ', array_filter([$item->zone, $item->aisle, $item->rack, $item->shelf, $item->bin]));
                         @endphp
-                        <flux:table.row :key="$item->id">
-                            <flux:table.cell>
-                                <flux:checkbox wire:model="selected_items" :value="$item->id" />
+                        <flux:table.row :key="$item->id" class="cursor-pointer hover:bg-zinc-50 transition-colors" onclick="document.getElementById('checkbox_{{ $item->id }}').click()">
+                            <flux:table.cell onclick="event.stopPropagation()">
+                                <flux:checkbox id="checkbox_{{ $item->id }}" wire:model.live="selected_items" :value="$item->id" />
                             </flux:table.cell>
                             <flux:table.cell>
                                 <span class="font-medium">{{ $title }}</span>
@@ -59,15 +53,10 @@
                             <flux:table.cell>
                                 <span class="font-mono font-medium">{{ $text }}</span>
                             </flux:table.cell>
-                            <flux:table.cell>
-                                <flux:button size="sm" variant="subtle" icon="qr-code" wire:click="generateLabel({{ $item->id }})">
-                                    {{ __('Generate') }}
-                                </flux:button>
-                            </flux:table.cell>
                         </flux:table.row>
                     @empty
                         <flux:table.row>
-                            <flux:table.cell colspan="4" class="text-center py-8 text-zinc-500">
+                            <flux:table.cell colspan="3" class="text-center py-8 text-zinc-500">
                                 {{ __('No records found.') }}
                             </flux:table.cell>
                         </flux:table.row>
@@ -82,7 +71,7 @@
     </flux:card>
 
     <!-- Print Modal -->
-    <flux:modal wire:model="show_print_modal" :heading="__('Print Labels')" class="md:w-[800px] print:hidden">
+    <flux:modal name="print-modal" :heading="__('Print Labels')" class="md:w-[800px] print:hidden">
         <div class="space-y-4">
             <div class="text-sm text-zinc-500 mb-4">
                 Verify the labels below. When ready, click Print to send to your thermal label printer.
@@ -95,13 +84,7 @@
                         <div class="text-xs text-zinc-500 mb-3">{{ $label['subtitle'] }}</div>
                         
                         @if($label['image'])
-                            @if($format === 'barcode')
-                                <img src="{{ $label['image'] }}" alt="Barcode" class="max-w-full h-16 object-contain mb-2" />
-                            @else
-                                <div class="w-32 h-32 mb-2 flex justify-center items-center">
-                                    {!! $label['image'] !!}
-                                </div>
-                            @endif
+                            <img src="{{ $label['image'] }}" alt="Barcode" class="max-w-full h-16 object-contain mb-2" />
                         @else
                             <div class="text-red-500 text-xs">Failed to generate</div>
                         @endif
@@ -143,7 +126,8 @@
                 height: 2in;
                 padding: 10px;
                 border: 1px solid #ccc;
-                page-break-inside: avoid;
+                page-break-after: always;
+                break-after: page;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -163,13 +147,7 @@
                 <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">{{ $label['title'] }}</div>
                 <div style="font-size: 10px; color: #666; margin-bottom: 8px;">{{ $label['subtitle'] }}</div>
                 @if($label['image'])
-                    @if($format === 'barcode')
-                        <img src="{{ $label['image'] }}" style="height: 50px; object-fit: contain; margin-bottom: 4px;" />
-                    @else
-                        <div style="width: 80px; height: 80px; margin-bottom: 4px;">
-                            {!! $label['image'] !!}
-                        </div>
-                    @endif
+                    <img src="{{ $label['image'] }}" style="height: 50px; object-fit: contain; margin-bottom: 4px;" />
                 @endif
                 <div style="font-family: monospace; font-size: 12px;">{{ $label['text'] }}</div>
             </div>
