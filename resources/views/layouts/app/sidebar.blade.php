@@ -17,7 +17,7 @@
 
                 @can('shipment.receive')
                 <flux:sidebar.group :heading="__('Operations')" class="grid mt-4">
-                    <flux:sidebar.item icon="arrow-down-tray" href="#" wire:navigate>
+                    <flux:sidebar.item icon="arrow-down-tray" :href="route('operations.receiving')" :current="request()->routeIs('operations.receiving')" wire:navigate>
                         {{ __('Receiving') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
