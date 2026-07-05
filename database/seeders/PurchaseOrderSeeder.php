@@ -5,6 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+
 class PurchaseOrderSeeder extends Seeder
 {
     /**
@@ -12,6 +15,11 @@ class PurchaseOrderSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        if (PurchaseOrder::count() === 0) {
+            // Create 15 Purchase Orders, each with 1 to 5 random PO Items attached
+            PurchaseOrder::factory(15)
+                ->has(PurchaseOrderItem::factory()->count(rand(1, 5)), 'items')
+                ->create();
+        }
     }
 }

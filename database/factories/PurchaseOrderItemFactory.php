@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<PurchaseOrderItem>
  */
+use App\Models\PurchaseOrder;
+use App\Models\Product;
+
 class PurchaseOrderItemFactory extends Factory
 {
     /**
@@ -17,8 +20,15 @@ class PurchaseOrderItemFactory extends Factory
      */
     public function definition(): array
     {
+        $ordered = fake()->numberBetween(10, 100);
+        $received = fake()->numberBetween(0, $ordered);
+
         return [
-            //
+            'purchase_order_id' => PurchaseOrder::inRandomOrder()->first()?->id ?? PurchaseOrder::factory(),
+            'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
+            'quantity_ordered' => $ordered,
+            'quantity_received' => $received,
+            'unit_price' => fake()->randomFloat(2, 5, 1000),
         ];
     }
 }
