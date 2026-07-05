@@ -3,31 +3,69 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-white">
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
+                <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                    {{ __('Dashboard') }}
+                </flux:sidebar.item>
+
+                @can('shipment.receive')
+                <flux:sidebar.group :heading="__('Operations')" class="grid mt-4">
+                    <flux:sidebar.item icon="arrow-down-tray" href="#" wire:navigate>
+                        {{ __('Receiving') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
-            </flux:sidebar.nav>
+                @endcan
 
-            <flux:spacer />
+                @can('order.pick')
+                <flux:sidebar.group :heading="__('Fulfillment')" class="grid mt-4">
+                    <flux:sidebar.item icon="arrow-up-tray" href="#" wire:navigate>
+                        {{ __('Picking') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+                @endcan
 
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
+                @canany(['inventory.view', 'product.manage'])
+                <flux:sidebar.group :heading="__('Inventory')" class="grid mt-4">
+                    <flux:sidebar.item icon="queue-list" href="#" wire:navigate>
+                        {{ __('Stock') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="qr-code" href="#" wire:navigate>
+                        {{ __('Products') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="clipboard-document-check" href="#" wire:navigate>
+                        {{ __('Counts') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+                @endcanany
 
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
+                @can('location.manage')
+                <flux:sidebar.group :heading="__('Warehouse')" class="grid mt-4">
+                    <flux:sidebar.item icon="map" href="#" wire:navigate>
+                        {{ __('Locations') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="truck" href="#" wire:navigate>
+                        {{ __('Suppliers') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+                @endcan
+
+                @can('user.manage')
+                <flux:sidebar.group :heading="__('Administration')" class="grid mt-4">
+                    <flux:sidebar.item icon="users" href="#" wire:navigate>
+                        {{ __('Users') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item icon="shield-check" href="#" wire:navigate>
+                        {{ __('Logs') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+                @endcan
             </flux:sidebar.nav>
 
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
