@@ -3,13 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Inventory;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
+use App\Models\Location;
 /**
  * @extends Factory<Inventory>
  */
 use App\Models\Product;
-use App\Models\Location;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class InventoryFactory extends Factory
 {

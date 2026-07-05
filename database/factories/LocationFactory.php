@@ -19,10 +19,10 @@ class LocationFactory extends Factory
     {
         $zone = fake()->randomElement(['A', 'B', 'C', 'D']);
         $aisle = (string) fake()->numberBetween(1, 20);
-        $rack = 'R' . fake()->numberBetween(1, 10);
-        $shelf = 'S' . fake()->numberBetween(1, 5);
-        $bin = 'B' . fake()->numberBetween(1, 5);
-        
+        $rack = 'R'.fake()->numberBetween(1, 10);
+        $shelf = 'S'.fake()->numberBetween(1, 5);
+        $bin = 'B'.fake()->numberBetween(1, 5);
+
         $barcode = "LOC-{$zone}-{$aisle}-{$rack}-{$shelf}-{$bin}";
 
         return [

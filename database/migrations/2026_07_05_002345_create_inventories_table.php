@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignUuid('location_id')->constrained()->cascadeOnDelete();
             $table->integer('quantity')->default(0);
             $table->timestamps();
-            
+
             // A product should only have one inventory record per location
             $table->unique(['product_id', 'location_id']);
         });

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
@@ -16,17 +16,17 @@ class RoleSeeder extends Seeder
         // receiving
         $receiving_role = Role::firstOrCreate(['name' => 'receiving']);
         $receiving_role->syncPermissions([
-            'dashboard.view', 
-            'inventory.view', 
-            'shipment.receive'
+            'dashboard.view',
+            'inventory.view',
+            'shipment.receive',
         ]);
 
         // picker
         $picker_role = Role::firstOrCreate(['name' => 'picker']);
         $picker_role->syncPermissions([
-            'dashboard.view', 
-            'inventory.view', 
-            'order.pick'
+            'dashboard.view',
+            'inventory.view',
+            'order.pick',
         ]);
 
         // clerk

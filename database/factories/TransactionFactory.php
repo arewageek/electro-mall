@@ -2,15 +2,14 @@
 
 namespace Database\Factories;
 
-use App\Models\Transaction;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
+use App\Models\Location;
+use App\Models\Product;
 /**
  * @extends Factory<Transaction>
  */
-use App\Models\Product;
-use App\Models\Location;
+use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TransactionFactory extends Factory
 {
@@ -23,7 +22,7 @@ class TransactionFactory extends Factory
     {
         $type = fake()->randomElement(['receive', 'pick', 'move', 'count_adjustment']);
         $quantity = ($type === 'pick') ? fake()->numberBetween(-100, -1) : fake()->numberBetween(1, 100);
-        
+
         return [
             'product_id' => Product::inRandomOrder()->first()?->id ?? Product::factory(),
             'location_id' => Location::inRandomOrder()->first()?->id ?? Location::factory(),
