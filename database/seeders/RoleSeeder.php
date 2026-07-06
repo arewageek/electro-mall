@@ -36,7 +36,6 @@ class RoleSeeder extends Seeder
             'inventory.view',
             'inventory.update',
             'inventory.count',
-            'shipment.receive',
             'transaction.view',
         ]);
 
@@ -47,9 +46,8 @@ class RoleSeeder extends Seeder
             'location.manage',
             'category.manage',
             'product.manage',
+            'supplier.manage',
             'inventory.view',
-            'inventory.update',
-            'inventory.count',
             'variance.approve',
             'report.view',
             'transaction.view',
@@ -59,7 +57,5 @@ class RoleSeeder extends Seeder
         $admin_role = Role::firstOrCreate(['name' => 'admin']);
         $admin_role->syncPermissions(Permission::all());
 
-        // super_admin (Bypasses all checks via Gate::before)
-        Role::firstOrCreate(['name' => 'super_admin']);
     }
 }

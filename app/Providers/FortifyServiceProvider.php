@@ -49,7 +49,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::loginView(fn () => view('livewire.auth.login'));
         Fortify::confirmPasswordView(fn () => view('livewire.auth.confirm-password'));
         Fortify::registerView(fn () => view('livewire.auth.register', [
-            'roles' => Role::where('name', '!=', 'super_admin')->get(),
+            'roles' => Role::where('name', '!=', 'admin')->get(),
         ]));
         Fortify::resetPasswordView(fn () => view('livewire.auth.reset-password'));
         Fortify::requestPasswordResetLinkView(fn () => view('livewire.auth.forgot-password'));
