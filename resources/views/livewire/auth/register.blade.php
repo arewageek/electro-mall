@@ -32,13 +32,6 @@
                 />
             </div>
 
-            <!-- Role Selection -->
-            <flux:select name="role" :label="__('Role')" required :placeholder="__('Select a role...')">
-                @foreach($roles as $role)
-                    <flux:select.option value="{{ $role->name }}">{{ str($role->name)->title()->replace('_', ' ') }}</flux:select.option>
-                @endforeach
-            </flux:select>
-
             <!-- Email Address -->
             <flux:input
                 name="email"
