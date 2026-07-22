@@ -11,9 +11,11 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
+                @if(auth()->user()?->hasAnyRole(['admin', 'manager', 'clerk']))
                 <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:sidebar.item>
+                @endif
 
                 @can('shipment.receive')
                 <flux:sidebar.group :heading="__('Operations')" class="grid mt-4">

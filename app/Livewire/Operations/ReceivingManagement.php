@@ -2,34 +2,40 @@
 
 namespace App\Livewire\Operations;
 
+use App\Models\Inventory;
+use App\Models\Location;
+use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
-use App\Models\Product;
-use App\Models\Location;
-use App\Models\Inventory;
 use App\Models\Transaction;
+use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Flux\Flux;
 
 class ReceivingManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
-    
+
     // Create PO Modal State
     public $show_create_modal = false;
+
     public $supplier_id = '';
+
     public $expected_delivery_date = '';
+
     public $notes = '';
+
     public $po_items = []; // [['product_id' => '', 'product_barcode' => '', 'product_name' => '', 'quantity' => 1, 'price' => 0]]
 
     // Receive Modal State
     public $show_receive_modal = false;
+
     public $receiving_po_id = null;
-    public $receive_items = []; 
+
+    public $receive_items = [];
     // [['item_id' => id, 'product_name' => name, 'ordered' => X, 'received_so_far' => Y, 'receiving_now' => 0, 'location_id' => '']]
 
     public function mount()
@@ -45,12 +51,14 @@ class ReceivingManagement extends Component
     public function resolveProduct($index)
     {
         $barcode = $this->po_items[$index]['product_barcode'] ?? '';
-        if (empty($barcode)) return;
+        if (empty($barcode)) {
+            return;
+        }
 
         $product = Product::where('barcode', $barcode)->orWhere('sku', $barcode)->first();
         if ($product) {
             $this->po_items[$index]['product_id'] = $product->id;
-            $this->po_items[$index]['product_name'] = $product->name . ' (' . $product->sku . ')';
+            $this->po_items[$index]['product_name'] = $product->name.' ('.$product->sku.')';
             $this->resetErrorBag("po_items.{$index}.product_barcode");
         } else {
             $this->po_items[$index]['product_id'] = '';
@@ -76,6 +84,13 @@ class ReceivingManagement extends Component
 
     public function savePo()
     {
+        // Auto-resolve any un-resolved barcodes
+        foreach ($this->po_items as $index => $item) {
+            if (empty($item['product_id']) && ! empty($item['product_barcode'])) {
+                $this->resolveProduct($index);
+            }
+        }
+
         $this->validate([
             'supplier_id' => ['required', 'exists:suppliers,id'],
             'expected_delivery_date' => ['nullable', 'date'],
@@ -83,12 +98,15 @@ class ReceivingManagement extends Component
             'po_items.*.product_id' => ['required', 'exists:products,id'],
             'po_items.*.quantity' => ['required', 'numeric', 'min:1'],
             'po_items.*.price' => ['required', 'numeric', 'min:0'],
+        ], [
+            'po_items.*.product_id.required' => __('You must scan or enter a valid product barcode.'),
+            'po_items.*.product_id.exists' => __('The scanned product barcode is invalid.'),
         ]);
 
         $po = PurchaseOrder::create([
             'supplier_id' => $this->supplier_id,
             'user_id' => auth()->id(),
-            'po_number' => 'PO-' . date('Ymd') . '-' . rand(1000, 9999),
+            'po_number' => 'PO-'.date('Ymd').'-'.rand(1000, 9999),
             'status' => 'submitted',
             'expected_delivery_date' => $this->expected_delivery_date ?: null,
             'notes' => $this->notes,
@@ -111,17 +129,17 @@ class ReceivingManagement extends Component
     public function receive($id)
     {
         $po = PurchaseOrder::with(['items.product'])->findOrFail($id);
-        
+
         $this->receiving_po_id = $po->id;
         $this->receive_items = [];
-        
+
         foreach ($po->items as $item) {
             if ($item->quantity_received < $item->quantity_ordered) {
                 $this->receive_items[] = [
                     'item_id' => $item->id,
                     'product_id' => $item->product_id,
                     'product_barcode' => $item->product->barcode,
-                    'product_name' => $item->product->name . ' (' . $item->product->sku . ')',
+                    'product_name' => $item->product->name.' ('.$item->product->sku.')',
                     'ordered' => $item->quantity_ordered,
                     'received_so_far' => $item->quantity_received,
                     'receiving_now' => 0,
@@ -134,6 +152,7 @@ class ReceivingManagement extends Component
 
         if (empty($this->receive_items)) {
             Flux::toast(variant: 'warning', text: __('This purchase order is already fully received.'));
+
             return;
         }
 
@@ -143,7 +162,9 @@ class ReceivingManagement extends Component
     public function resolveLocation($index)
     {
         $barcode = $this->receive_items[$index]['location_barcode'] ?? '';
-        if (empty($barcode)) return;
+        if (empty($barcode)) {
+            return;
+        }
 
         $location = Location::where('barcode', $barcode)->first();
         if ($location) {
@@ -159,6 +180,14 @@ class ReceivingManagement extends Component
 
     public function saveReceive()
     {
+        // Auto-resolve locations
+        foreach ($this->receive_items as $index => $rItem) {
+            if (empty($rItem['location_id']) && ! empty($rItem['location_barcode'])) {
+                $this->resolveLocation($index);
+                // No need to re-assign if we use $this->receive_items in validation
+            }
+        }
+
         $this->validate([
             'receive_items.*.receiving_now' => ['required', 'numeric', 'min:0'],
         ]);
@@ -166,6 +195,7 @@ class ReceivingManagement extends Component
         foreach ($this->receive_items as $index => $rItem) {
             if ($rItem['receiving_now'] > 0 && empty($rItem['location_id'])) {
                 $this->addError("receive_items.{$index}.location_barcode", __('You must scan or enter a valid location barcode.'));
+
                 return;
             }
         }
@@ -176,7 +206,7 @@ class ReceivingManagement extends Component
         foreach ($this->receive_items as $rItem) {
             if ($rItem['receiving_now'] > 0) {
                 $total_received_in_this_batch += $rItem['receiving_now'];
-                
+
                 $poItem = PurchaseOrderItem::findOrFail($rItem['item_id']);
                 $poItem->increment('quantity_received', $rItem['receiving_now']);
 
@@ -184,11 +214,11 @@ class ReceivingManagement extends Component
                 $inventory = Inventory::firstOrCreate(
                     [
                         'product_id' => $rItem['product_id'],
-                        'location_id' => $rItem['location_id']
+                        'location_id' => $rItem['location_id'],
                     ],
                     ['quantity' => 0]
                 );
-                
+
                 $inventory->increment('quantity', $rItem['receiving_now']);
 
                 // Log transaction
@@ -199,14 +229,14 @@ class ReceivingManagement extends Component
                     'type' => 'receive',
                     'quantity' => $rItem['receiving_now'],
                     'reference' => $po->po_number,
-                    'notes' => 'Received from PO ' . $po->po_number,
+                    'notes' => 'Received from PO '.$po->po_number,
                 ]);
             }
         }
 
         if ($total_received_in_this_batch > 0) {
             Flux::toast(variant: 'success', text: __('Items received and added to inventory.'));
-            
+
             // Check if PO is fully received
             $all_received = true;
             foreach ($po->items as $item) {
@@ -215,9 +245,9 @@ class ReceivingManagement extends Component
                     break;
                 }
             }
-            
+
             $po->update([
-                'status' => $all_received ? 'received' : 'partially_received'
+                'status' => $all_received ? 'received' : 'partially_received',
             ]);
         } else {
             Flux::toast(variant: 'warning', text: __('No items were received.'));
@@ -235,11 +265,11 @@ class ReceivingManagement extends Component
     {
         $purchase_orders = PurchaseOrder::query()
             ->with(['supplier', 'items'])
-            ->when($this->search, function($q) {
-                $q->where('po_number', 'like', '%' . $this->search . '%')
-                  ->orWhereHas('supplier', function($q2) {
-                      $q2->where('name', 'like', '%' . $this->search . '%');
-                  });
+            ->when($this->search, function ($q) {
+                $q->where('po_number', 'like', '%'.$this->search.'%')
+                    ->orWhereHas('supplier', function ($q2) {
+                        $q2->where('name', 'like', '%'.$this->search.'%');
+                    });
             })
             ->latest()
             ->paginate(15);

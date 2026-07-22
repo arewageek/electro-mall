@@ -10,9 +10,11 @@
             <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
 
             <flux:navbar class="-mb-px max-lg:hidden">
+                @if(auth()->user()?->hasAnyRole(['admin', 'manager', 'clerk']))
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
+                @endif
             </flux:navbar>
 
             <flux:spacer />
@@ -52,11 +54,13 @@
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
+                @if(auth()->user()?->hasAnyRole(['admin', 'manager', 'clerk']))
                 <flux:sidebar.group :heading="__('Platform')">
                     <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard')  }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
+                @endif
             </flux:sidebar.nav>
 
             <flux:spacer />
