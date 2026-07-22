@@ -104,6 +104,7 @@
                                 <flux:label class="text-xs">{{ __('Product (Scan Barcode)') }}</flux:label>
                                 <div class="flex gap-2 items-center">
                                     <flux:input wire:model="order_items.{{ $index }}.product_barcode" wire:keydown.enter.prevent="resolveProduct({{ $index }})" placeholder="{{ __('Scan or type barcode & hit Enter') }}" />
+                                    <x-barcode-scanner id="scanner-order-product-{{ $index }}" x-on:scan="$wire.set('order_items.{{ $index }}.product_barcode', $event.detail.code); $wire.resolveProduct({{ $index }})" />
                                 </div>
                                 @if(!empty($item['product_name']))
                                     <div class="text-xs text-green-600 mt-1 font-medium flex items-center gap-1">
@@ -111,6 +112,7 @@
                                     </div>
                                 @endif
                                 <flux:error name="order_items.{{ $index }}.product_barcode" />
+                                <flux:error name="order_items.{{ $index }}.product_id" />
                             </flux:field>
                             
                             <flux:field class="w-full md:w-32">
@@ -165,6 +167,7 @@
                             
                             <div class="flex gap-2 items-center mb-2">
                                 <flux:input wire:model="pick_items.{{ $index }}.location_barcode" wire:keydown.enter.prevent="resolveLocation({{ $index }})" placeholder="{{ __('Scan location barcode...') }}" />
+                                <x-barcode-scanner id="scanner-pick-location-{{ $index }}" x-on:scan="$wire.set('pick_items.{{ $index }}.location_barcode', $event.detail.code); $wire.resolveLocation({{ $index }})" />
                             </div>
                             
                             @if(!empty($item['location_name']))

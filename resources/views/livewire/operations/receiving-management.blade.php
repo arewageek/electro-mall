@@ -113,6 +113,7 @@
                                 <flux:label class="text-xs">{{ __('Product (Scan Barcode)') }}</flux:label>
                                 <div class="flex gap-2 items-center">
                                     <flux:input wire:model="po_items.{{ $index }}.product_barcode" wire:keydown.enter.prevent="resolveProduct({{ $index }})" placeholder="{{ __('Scan or type barcode & hit Enter') }}" />
+                                    <x-barcode-scanner id="scanner-po-product-{{ $index }}" x-on:scan="$wire.set('po_items.{{ $index }}.product_barcode', $event.detail.code); $wire.resolveProduct({{ $index }})" />
                                 </div>
                                 @if(!empty($item['product_name']))
                                     <div class="text-xs text-green-600 mt-1 font-medium flex items-center gap-1">
@@ -120,6 +121,7 @@
                                     </div>
                                 @endif
                                 <flux:error name="po_items.{{ $index }}.product_barcode" />
+                                <flux:error name="po_items.{{ $index }}.product_id" />
                             </flux:field>
                             
                             <flux:field class="w-full md:w-32">
@@ -174,12 +176,14 @@
                             <flux:field class="w-32">
                                 <flux:label>{{ __('Receiving Now') }}</flux:label>
                                 <flux:input type="number" min="0" max="{{ $item['ordered'] - $item['received_so_far'] }}" wire:model="receive_items.{{ $index }}.receiving_now" />
+                                <flux:error name="receive_items.{{ $index }}.receiving_now" />
                             </flux:field>
 
                             <flux:field class="flex-1">
                                 <flux:label>{{ __('Put-away Location (Scan Barcode)') }}</flux:label>
                                 <div class="flex gap-2 items-center">
                                     <flux:input wire:model="receive_items.{{ $index }}.location_barcode" wire:keydown.enter.prevent="resolveLocation({{ $index }})" placeholder="{{ __('Scan location barcode...') }}" />
+                                    <x-barcode-scanner id="scanner-receive-location-{{ $index }}" x-on:scan="$wire.set('receive_items.{{ $index }}.location_barcode', $event.detail.code); $wire.resolveLocation({{ $index }})" />
                                 </div>
                                 @if(!empty($item['location_name']))
                                     <div class="text-xs text-green-600 mt-1 font-medium flex items-center gap-1">
