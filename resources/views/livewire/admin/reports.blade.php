@@ -4,8 +4,12 @@
             <flux:heading size="xl" level="1">{{ __('Activity Reports') }}</flux:heading>
             <flux:subheading>{{ __('Generate structured reports for warehouse transactions.') }}</flux:subheading>
         </div>
-        <div class="flex gap-3">
-            <flux:button wire:click="exportCsv" icon="arrow-down-tray" variant="primary">{{ __('Export CSV') }}</flux:button>
+        <div class="flex items-center gap-2">
+            <flux:select wire:model="export_format" size="sm" class="w-24">
+                <flux:select.option value="csv">CSV</flux:select.option>
+                <flux:select.option value="pdf">PDF</flux:select.option>
+            </flux:select>
+            <flux:button wire:click="exportReport" icon="arrow-down-tray" variant="primary" size="sm">{{ __('Export') }}</flux:button>
         </div>
     </div>
 
@@ -54,7 +58,7 @@
                     <flux:table.column>{{ __('Product') }}</flux:table.column>
                     <flux:table.column>{{ __('Qty') }}</flux:table.column>
                     <flux:table.column>{{ __('User') }}</flux:table.column>
-                    <flux:table.column>{{ __('Ref / Notes') }}</flux:table.column>
+                    <flux:table.column>{{ __('Reference') }}</flux:table.column>
                 </flux:table.columns>
 
                 <flux:table.rows>
@@ -95,14 +99,11 @@
                                 <span class="text-sm font-medium">{{ $log->user->name ?? 'System' }}</span>
                             </flux:table.cell>
                             <flux:table.cell>
-                                <div class="flex flex-col">
-                                    @if($log->reference)
-                                        <span class="text-xs font-mono font-medium text-zinc-700">{{ $log->reference }}</span>
-                                    @endif
-                                    @if($log->notes)
-                                        <span class="text-xs text-zinc-500 truncate max-w-[150px]" title="{{ $log->notes }}">{{ $log->notes }}</span>
-                                    @endif
-                                </div>
+                                @if($log->reference)
+                                    <span class="text-xs font-mono font-medium text-zinc-700">{{ $log->reference }}</span>
+                                @else
+                                    <span class="text-zinc-400 italic">None</span>
+                                @endif
                             </flux:table.cell>
                         </flux:table.row>
                     @empty

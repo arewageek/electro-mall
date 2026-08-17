@@ -21,6 +21,8 @@ class Reports extends Component
 
     public $search = '';
 
+    public $export_format = 'csv';
+
     public function updatedStartDate()
     {
         $this->resetPage();
@@ -53,6 +55,7 @@ class Reports extends Component
         $this->filter_type = '';
         $this->category_id = '';
         $this->search = '';
+        $this->export_format = 'csv';
         $this->resetPage();
     }
 
@@ -94,11 +97,21 @@ class Reports extends Component
             ->latest();
     }
 
-    public function exportCsv()
+    public function exportReport()
     {
         $transactions = $this->getTransactionsQuery()->get();
+        $filenameBase = 'report_'.date('Ymd_His');
 
-        $csvHeader = ['Date', 'Type', 'Category', 'Product', 'SKU', 'Location', 'Quantity', 'User', 'Reference', 'Notes'];
+        if ($this->export_format === 'pdf') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.report', compact('transactions'))
+                ->setPaper('a4', 'landscape');
+            
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->output();
+            }, $filenameBase.'.pdf');
+        }
+
+        $csvHeader = ['Date', 'Type', 'Category', 'Product', 'SKU', 'Location', 'Quantity', 'User', 'Reference'];
 
         $callback = function () use ($transactions, $csvHeader) {
             $file = fopen('php://output', 'w');
@@ -115,17 +128,14 @@ class Reports extends Component
                     $log->quantity,
                     $log->user->name ?? 'System',
                     $log->reference,
-                    $log->notes,
                 ]);
             }
             fclose($file);
         };
 
-        $filename = 'report_'.date('Ymd_His').'.csv';
-
-        return response()->streamDownload($callback, $filename, [
+        return response()->streamDownload($callback, $filenameBase.'.csv', [
             'Content-type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=$filename",
+            'Content-Disposition' => "attachment; filename=$filenameBase.csv",
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
