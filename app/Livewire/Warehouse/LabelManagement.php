@@ -23,8 +23,6 @@ class LabelManagement extends Component
 
     public $print_labels = [];
 
-
-
     // Bulk generate labels
     public function generateBulkLabels()
     {

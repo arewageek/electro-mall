@@ -3,24 +3,29 @@
 namespace App\Livewire\Inventory;
 
 use App\Models\Inventory;
-use App\Models\Product;
 use App\Models\Location;
+use App\Models\Product;
+use App\Models\Transaction;
+use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Flux\Flux;
 
 class StockManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
-    
+
     public $inventory_id = null;
+
     public $product_id = '';
+
     public $location_id = '';
+
     public $quantity = 0;
 
     public $is_editing = false;
+
     public $show_modal = false;
 
     public function rules()
@@ -43,12 +48,12 @@ class StockManagement extends Component
     public function edit($id)
     {
         $inventory = Inventory::findOrFail($id);
-        
+
         $this->inventory_id = $inventory->id;
         $this->product_id = $inventory->product_id;
         $this->location_id = $inventory->location_id;
         $this->quantity = $inventory->quantity;
-        
+
         $this->is_editing = true;
         $this->show_modal = true;
         $this->resetValidation();
@@ -66,7 +71,7 @@ class StockManagement extends Component
 
         $old_quantity = 0;
         $transaction_type = 'count_adjustment';
-        
+
         if ($this->inventory_id) {
             $inventory = Inventory::findOrFail($this->inventory_id);
             $old_quantity = $inventory->quantity;
@@ -75,7 +80,7 @@ class StockManagement extends Component
         // Check if there's already an inventory record for this product at this location
         $existing = Inventory::where('product_id', $this->product_id)
             ->where('location_id', $this->location_id)
-            ->when($this->inventory_id, function($q) {
+            ->when($this->inventory_id, function ($q) {
                 $q->where('id', '!=', $this->inventory_id);
             })
             ->first();
@@ -83,9 +88,9 @@ class StockManagement extends Component
         if ($existing) {
             // Consolidate quantity: If moving stock from one location to another where it already exists
             $added_quantity = $this->quantity; // The amount we are saying exists here now from the move
-            
+
             $existing->increment('quantity', $added_quantity);
-            
+
             if ($this->inventory_id) {
                 // We moved it, so delete the old record
                 Inventory::findOrFail($this->inventory_id)->delete();
@@ -93,8 +98,8 @@ class StockManagement extends Component
             } else {
                 $transaction_type = 'receive';
             }
-            
-            \App\Models\Transaction::create([
+
+            Transaction::create([
                 'product_id' => $this->product_id,
                 'location_id' => $this->location_id,
                 'user_id' => auth()->id(),
@@ -102,11 +107,11 @@ class StockManagement extends Component
                 'quantity' => $added_quantity,
                 'notes' => 'Stock consolidated/moved.',
             ]);
-            
+
             Flux::toast(variant: 'success', text: __('Stock consolidated successfully.'));
         } else {
             $diff = $this->quantity - $old_quantity;
-            
+
             if ($this->inventory_id) {
                 $transaction_type = 'count_adjustment';
                 Inventory::findOrFail($this->inventory_id)->update($data);
@@ -117,9 +122,9 @@ class StockManagement extends Component
                 Inventory::create($data);
                 Flux::toast(variant: 'success', text: __('Stock added successfully.'));
             }
-            
+
             if ($diff != 0 || $transaction_type === 'move') {
-                \App\Models\Transaction::create([
+                Transaction::create([
                     'product_id' => $this->product_id,
                     'location_id' => $this->location_id,
                     'user_id' => auth()->id(),
@@ -133,12 +138,12 @@ class StockManagement extends Component
         $this->show_modal = false;
         $this->reset(['inventory_id', 'product_id', 'location_id', 'quantity']);
     }
-    
+
     public function delete($id)
     {
         $inventory = Inventory::findOrFail($id);
-        
-        \App\Models\Transaction::create([
+
+        Transaction::create([
             'product_id' => $inventory->product_id,
             'location_id' => $inventory->location_id,
             'user_id' => auth()->id(),
@@ -146,9 +151,9 @@ class StockManagement extends Component
             'quantity' => -$inventory->quantity,
             'notes' => 'Stock record deleted manually.',
         ]);
-        
+
         $inventory->delete();
-        
+
         Flux::toast(variant: 'success', text: __('Stock record deleted.'));
     }
 
@@ -161,16 +166,16 @@ class StockManagement extends Component
     {
         $stock = Inventory::query()
             ->with(['product', 'location'])
-            ->whereHas('product', function($q) {
-                $q->when($this->search, function($q2) {
-                    $q2->where('name', 'like', '%' . $this->search . '%')
-                       ->orWhere('sku', 'like', '%' . $this->search . '%');
+            ->whereHas('product', function ($q) {
+                $q->when($this->search, function ($q2) {
+                    $q2->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('sku', 'like', '%'.$this->search.'%');
                 });
             })
-            ->orWhereHas('location', function($q) {
-                $q->when($this->search, function($q2) {
-                    $q2->where('zone', 'like', '%' . $this->search . '%')
-                       ->orWhere('barcode', 'like', '%' . $this->search . '%');
+            ->orWhereHas('location', function ($q) {
+                $q->when($this->search, function ($q2) {
+                    $q2->where('zone', 'like', '%'.$this->search.'%')
+                        ->orWhere('barcode', 'like', '%'.$this->search.'%');
                 });
             })
             ->latest()

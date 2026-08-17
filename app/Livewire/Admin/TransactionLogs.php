@@ -11,6 +11,7 @@ class TransactionLogs extends Component
     use WithPagination;
 
     public $search = '';
+
     public $filter_type = '';
 
     public function updatedSearch()
@@ -27,18 +28,18 @@ class TransactionLogs extends Component
     {
         $transactions = Transaction::query()
             ->with(['product', 'location', 'user'])
-            ->when($this->search, function($q) {
-                $q->whereHas('product', function($q2) {
-                    $q2->where('name', 'like', '%' . $this->search . '%')
-                       ->orWhere('sku', 'like', '%' . $this->search . '%');
+            ->when($this->search, function ($q) {
+                $q->whereHas('product', function ($q2) {
+                    $q2->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('sku', 'like', '%'.$this->search.'%');
                 })
-                ->orWhereHas('user', function($q2) {
-                    $q2->where('name', 'like', '%' . $this->search . '%');
-                })
-                ->orWhere('reference', 'like', '%' . $this->search . '%')
-                ->orWhere('notes', 'like', '%' . $this->search . '%');
+                    ->orWhereHas('user', function ($q2) {
+                        $q2->where('name', 'like', '%'.$this->search.'%');
+                    })
+                    ->orWhere('reference', 'like', '%'.$this->search.'%')
+                    ->orWhere('notes', 'like', '%'.$this->search.'%');
             })
-            ->when($this->filter_type, function($q) {
+            ->when($this->filter_type, function ($q) {
                 $q->where('type', $this->filter_type);
             })
             ->latest()

@@ -4,8 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Inventory;
 use App\Models\Order;
-use App\Models\PurchaseOrder;
 use App\Models\Product;
+use App\Models\PurchaseOrder;
 use App\Models\Transaction;
 use Livewire\Component;
 
@@ -15,7 +15,7 @@ class Dashboard extends Component
     {
         // Summary Metrics
         $total_items_in_stock = Inventory::sum('quantity');
-        
+
         $pending_pos_count = PurchaseOrder::whereIn('status', ['draft', 'submitted', 'partially_received'])->count();
         $pending_pos = PurchaseOrder::whereIn('status', ['draft', 'submitted', 'partially_received'])
             ->latest()->take(3)->get();
@@ -28,7 +28,7 @@ class Dashboard extends Component
         // This requires joining products and their total inventory, or calculating it.
         // A simpler way for a prototype is to query products and sum relationships.
         $products = Product::withSum('inventories as total_qty', 'quantity')->get();
-        $low_stock_products = $products->filter(function($product) {
+        $low_stock_products = $products->filter(function ($product) {
             // Since min_stock_level is not in the schema, we use a default of 150 for alerts to show more items
             return $product->total_qty <= 150;
         })->sortBy('total_qty')->take(5);

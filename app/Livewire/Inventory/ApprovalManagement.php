@@ -14,6 +14,7 @@ class ApprovalManagement extends Component
     use WithPagination;
 
     public $search = '';
+
     public $statusFilter = 'pending';
 
     public function updatedSearch()
@@ -29,9 +30,10 @@ class ApprovalManagement extends Component
     public function approve($id)
     {
         $variance = InventoryVariance::findOrFail($id);
-        
+
         if ($variance->status !== 'pending') {
             Flux::toast(variant: 'danger', text: __('Variance is already resolved.'));
+
             return;
         }
 
@@ -57,7 +59,7 @@ class ApprovalManagement extends Component
             'user_id' => auth()->id(),
             'type' => 'count_adjustment',
             'quantity' => $diff,
-            'notes' => 'Variance Approved: ' . $variance->notes,
+            'notes' => 'Variance Approved: '.$variance->notes,
         ]);
 
         $variance->update([
@@ -72,9 +74,10 @@ class ApprovalManagement extends Component
     public function reject($id)
     {
         $variance = InventoryVariance::findOrFail($id);
-        
+
         if ($variance->status !== 'pending') {
             Flux::toast(variant: 'danger', text: __('Variance is already resolved.'));
+
             return;
         }
 
@@ -98,8 +101,8 @@ class ApprovalManagement extends Component
             })
             ->whereHas('product', function ($q) {
                 $q->when($this->search, function ($q2) {
-                    $q2->where('name', 'like', '%' . $this->search . '%')
-                        ->orWhere('sku', 'like', '%' . $this->search . '%');
+                    $q2->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('sku', 'like', '%'.$this->search.'%');
                 });
             })
             ->latest()

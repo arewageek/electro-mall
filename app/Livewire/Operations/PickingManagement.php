@@ -2,14 +2,15 @@
 
 namespace App\Livewire\Operations;
 
+use App\Models\Inventory;
+use App\Models\Location;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Models\Inventory;
 use App\Models\Transaction;
+use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Flux\Flux;
 
 class PickingManagement extends Component
 {
@@ -19,15 +20,21 @@ class PickingManagement extends Component
 
     // Create Order Modal State
     public $show_create_modal = false;
+
     public $customer_name = '';
+
     public $customer_email = '';
+
     public $shipping_address = '';
+
     public $order_items = []; // [['product_id' => '', 'product_barcode' => '', 'product_name' => '', 'quantity' => 1, 'price' => 0]]
 
     // Pick Order Modal State
     public $show_pick_modal = false;
+
     public $picking_order_id = null;
-    public $pick_items = []; 
+
+    public $pick_items = [];
     // [['item_id' => id, 'product_id' => id, 'product_name' => name, 'quantity' => X, 'locations' => [...], 'selected_location_id' => '']]
 
     public function mount()
@@ -43,12 +50,14 @@ class PickingManagement extends Component
     public function resolveProduct($index)
     {
         $barcode = $this->order_items[$index]['product_barcode'] ?? '';
-        if (empty($barcode)) return;
+        if (empty($barcode)) {
+            return;
+        }
 
         $product = Product::where('barcode', $barcode)->orWhere('sku', $barcode)->first();
         if ($product) {
             $this->order_items[$index]['product_id'] = $product->id;
-            $this->order_items[$index]['product_name'] = $product->name . ' (' . $product->sku . ')';
+            $this->order_items[$index]['product_name'] = $product->name.' ('.$product->sku.')';
             $this->resetErrorBag("order_items.{$index}.product_barcode");
         } else {
             $this->order_items[$index]['product_id'] = '';
@@ -84,12 +93,12 @@ class PickingManagement extends Component
             'order_items.*.price' => ['required', 'numeric', 'min:0'],
         ]);
 
-        $total_amount = collect($this->order_items)->sum(function($item) {
+        $total_amount = collect($this->order_items)->sum(function ($item) {
             return $item['quantity'] * $item['price'];
         });
 
         $order = Order::create([
-            'order_number' => 'ORD-' . date('Ymd') . '-' . rand(1000, 9999),
+            'order_number' => 'ORD-'.date('Ymd').'-'.rand(1000, 9999),
             'customer_name' => $this->customer_name,
             'customer_email' => $this->customer_email,
             'shipping_address' => $this->shipping_address,
@@ -113,28 +122,28 @@ class PickingManagement extends Component
     public function pick($id)
     {
         $order = Order::with(['items.product'])->findOrFail($id);
-        
+
         $this->picking_order_id = $order->id;
         $this->pick_items = [];
-        
+
         foreach ($order->items as $item) {
             // Find where this product is located in the warehouse
             $inventory_locations = Inventory::with('location')
                 ->where('product_id', $item->product_id)
                 ->where('quantity', '>', 0)
                 ->get()
-                ->map(function($inv) {
+                ->map(function ($inv) {
                     return [
                         'id' => $inv->location_id,
-                        'name' => implode(' / ', array_filter([$inv->location->zone, $inv->location->aisle, $inv->location->rack, $inv->location->shelf, $inv->location->bin])) . " (Qty: {$inv->quantity})",
-                        'available' => $inv->quantity
+                        'name' => implode(' / ', array_filter([$inv->location->zone, $inv->location->aisle, $inv->location->rack, $inv->location->shelf, $inv->location->bin]))." (Qty: {$inv->quantity})",
+                        'available' => $inv->quantity,
                     ];
                 })->toArray();
 
             $this->pick_items[] = [
                 'item_id' => $item->id,
                 'product_id' => $item->product_id,
-                'product_name' => $item->product->name . ' (' . $item->product->sku . ')',
+                'product_name' => $item->product->name.' ('.$item->product->sku.')',
                 'quantity' => $item->quantity,
                 'locations' => $inventory_locations,
                 'selected_location_id' => '',
@@ -149,12 +158,14 @@ class PickingManagement extends Component
     public function resolveLocation($index)
     {
         $barcode = $this->pick_items[$index]['location_barcode'] ?? '';
-        if (empty($barcode)) return;
+        if (empty($barcode)) {
+            return;
+        }
 
-        $location = \App\Models\Location::where('barcode', $barcode)->first();
+        $location = Location::where('barcode', $barcode)->first();
         if ($location) {
             $has_inventory = collect($this->pick_items[$index]['locations'])->contains('id', $location->id);
-            
+
             if ($has_inventory) {
                 $this->pick_items[$index]['selected_location_id'] = $location->id;
                 $this->pick_items[$index]['location_name'] = implode(' / ', array_filter([$location->zone, $location->aisle, $location->rack, $location->shelf, $location->bin]));
@@ -176,6 +187,7 @@ class PickingManagement extends Component
         foreach ($this->pick_items as $index => $pItem) {
             if (empty($pItem['selected_location_id'])) {
                 $this->addError("pick_items.{$index}.location_barcode", __('You must scan or enter a valid location barcode.'));
+
                 return;
             }
         }
@@ -188,8 +200,9 @@ class PickingManagement extends Component
                 ->where('location_id', $pItem['selected_location_id'])
                 ->first();
 
-            if (!$inventory || $inventory->quantity < $pItem['quantity']) {
+            if (! $inventory || $inventory->quantity < $pItem['quantity']) {
                 Flux::toast(variant: 'danger', text: "Insufficient stock for {$pItem['product_name']} at selected location.");
+
                 return;
             }
         }
@@ -199,7 +212,7 @@ class PickingManagement extends Component
             $inventory = Inventory::where('product_id', $pItem['product_id'])
                 ->where('location_id', $pItem['selected_location_id'])
                 ->first();
-                
+
             $inventory->decrement('quantity', $pItem['quantity']);
 
             // Log transaction
@@ -210,12 +223,12 @@ class PickingManagement extends Component
                 'type' => 'pick',
                 'quantity' => -$pItem['quantity'], // Negative for picking
                 'reference' => $order->order_number,
-                'notes' => 'Picked for Order ' . $order->order_number,
+                'notes' => 'Picked for Order '.$order->order_number,
             ]);
         }
 
         $order->update([
-            'status' => 'picked'
+            'status' => 'picked',
         ]);
 
         Flux::toast(variant: 'success', text: __('Order successfully picked from inventory.'));
@@ -231,9 +244,9 @@ class PickingManagement extends Component
     {
         $orders = Order::query()
             ->with(['items'])
-            ->when($this->search, function($q) {
-                $q->where('order_number', 'like', '%' . $this->search . '%')
-                  ->orWhere('customer_name', 'like', '%' . $this->search . '%');
+            ->when($this->search, function ($q) {
+                $q->where('order_number', 'like', '%'.$this->search.'%')
+                    ->orWhere('customer_name', 'like', '%'.$this->search.'%');
             })
             ->latest()
             ->paginate(15);

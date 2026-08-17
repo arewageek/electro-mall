@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Category;
 use App\Models\Transaction;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -20,6 +21,8 @@ class Reports extends Component
     public $category_id = '';
 
     public $search = '';
+
+    public $export_format = 'csv';
 
     public function updatedStartDate()
     {
@@ -53,6 +56,7 @@ class Reports extends Component
         $this->filter_type = '';
         $this->category_id = '';
         $this->search = '';
+        $this->export_format = 'csv';
         $this->resetPage();
     }
 
@@ -94,14 +98,30 @@ class Reports extends Component
             ->latest();
     }
 
-    public function exportCsv()
+    public function exportReport()
     {
         $transactions = $this->getTransactionsQuery()->get();
+        $filenameBase = 'report_'.date('Ymd_His');
 
-        $csvHeader = ['Date', 'Type', 'Category', 'Product', 'SKU', 'Location', 'Quantity', 'User', 'Reference', 'Notes'];
+        if ($this->export_format === 'pdf') {
+            $pdf = Pdf::loadView('pdf.report', compact('transactions'))
+                ->setPaper('a4', 'landscape');
 
-        $callback = function () use ($transactions, $csvHeader) {
+            return response()->streamDownload(function () use ($pdf) {
+                echo $pdf->output();
+            }, $filenameBase.'.pdf');
+        }
+
+        $csvHeader = ['Date', 'Type', 'Category', 'Product', 'SKU', 'Location', 'Quantity', 'User', 'Reference'];
+        $appName = config('app.name');
+
+        $callback = function () use ($transactions, $csvHeader, $appName) {
             $file = fopen('php://output', 'w');
+
+            // Add a title row
+            fputcsv($file, [$appName.' - Activity Report']);
+            fputcsv($file, []); // Empty row for spacing
+
             fputcsv($file, $csvHeader);
 
             foreach ($transactions as $log) {
@@ -115,17 +135,14 @@ class Reports extends Component
                     $log->quantity,
                     $log->user->name ?? 'System',
                     $log->reference,
-                    $log->notes,
                 ]);
             }
             fclose($file);
         };
 
-        $filename = 'report_'.date('Ymd_His').'.csv';
-
-        return response()->streamDownload($callback, $filename, [
+        return response()->streamDownload($callback, $filenameBase.'.csv', [
             'Content-type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=$filename",
+            'Content-Disposition' => "attachment; filename=$filenameBase.csv",
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',

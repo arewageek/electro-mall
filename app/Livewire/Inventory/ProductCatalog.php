@@ -2,35 +2,51 @@
 
 namespace App\Livewire\Inventory;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\Supplier;
+use chillerlan\QRCode\Common\EccLevel;
+use chillerlan\QRCode\Output\QRMarkupSVG;
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
+use Flux\Flux;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Str;
-use Flux\Flux;
+use Picqer\Barcode\BarcodeGeneratorSVG;
 
 class ProductCatalog extends Component
 {
     use WithPagination;
 
     public $search = '';
-    
+
     public $product_id = null;
+
     public $category_id = '';
+
     public $supplier_id = '';
+
     public $name = '';
+
     public $sku = '';
+
     public $barcode = '';
+
     public $description = '';
+
     public $unit_price = '';
 
     public $is_editing = false;
+
     public $show_modal = false;
-    
+
     public $show_print_modal = false;
+
     public $print_product = null;
+
     public $print_barcode_svg = '';
+
     public $print_qrcode_svg = '';
 
     public function rules()
@@ -39,8 +55,8 @@ class ProductCatalog extends Component
             'category_id' => ['required', 'exists:categories,id'],
             'supplier_id' => ['required', 'exists:suppliers,id'],
             'name' => ['required', 'string', 'max:255'],
-            'sku' => ['required', 'string', 'max:255', 'unique:products,sku,' . $this->product_id],
-            'barcode' => ['nullable', 'string', 'max:255', 'unique:products,barcode,' . $this->product_id],
+            'sku' => ['required', 'string', 'max:255', 'unique:products,sku,'.$this->product_id],
+            'barcode' => ['nullable', 'string', 'max:255', 'unique:products,barcode,'.$this->product_id],
             'description' => ['nullable', 'string'],
             'unit_price' => ['required', 'numeric', 'min:0'],
         ];
@@ -49,25 +65,26 @@ class ProductCatalog extends Component
     public function printLabel($id)
     {
         $product = Product::findOrFail($id);
-        
+
         if (empty($product->barcode)) {
             Flux::toast(variant: 'warning', text: __('This product does not have a barcode. Please edit and generate one first.'));
+
             return;
         }
-        
+
         $this->print_product = $product;
-        
+
         // Generate 1D Barcode (CODE128)
-        $generator = new \Picqer\Barcode\BarcodeGeneratorSVG();
+        $generator = new BarcodeGeneratorSVG;
         $this->print_barcode_svg = $generator->getBarcode($product->barcode, $generator::TYPE_CODE_128, 2, 60);
 
         // Generate QR Code
-        $options = new \chillerlan\QRCode\QROptions([
-            'outputInterface' => \chillerlan\QRCode\Output\QRMarkupSVG::class,
-            'eccLevel'   => \chillerlan\QRCode\Common\EccLevel::L,
+        $options = new QROptions([
+            'outputInterface' => QRMarkupSVG::class,
+            'eccLevel' => EccLevel::L,
             'addQuietzone' => false,
         ]);
-        $this->print_qrcode_svg = (new \chillerlan\QRCode\QRCode($options))->render($product->barcode);
+        $this->print_qrcode_svg = (new QRCode($options))->render($product->barcode);
 
         $this->show_print_modal = true;
     }
@@ -83,7 +100,7 @@ class ProductCatalog extends Component
     public function edit($id)
     {
         $product = Product::findOrFail($id);
-        
+
         $this->product_id = $product->id;
         $this->category_id = $product->category_id;
         $this->supplier_id = $product->supplier_id;
@@ -92,7 +109,7 @@ class ProductCatalog extends Component
         $this->barcode = $product->barcode;
         $this->description = $product->description;
         $this->unit_price = $product->unit_price;
-        
+
         $this->is_editing = true;
         $this->show_modal = true;
         $this->resetValidation();
@@ -102,17 +119,18 @@ class ProductCatalog extends Component
     {
         if (empty($this->name)) {
             Flux::toast(variant: 'danger', text: __('Enter a product name first to generate SKU.'));
+
             return;
         }
-        
+
         $prefix = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $this->name), 0, 3));
-        $this->sku = $prefix . '-' . strtoupper(Str::random(6));
+        $this->sku = $prefix.'-'.strtoupper(Str::random(6));
     }
 
     public function generateBarcode()
     {
         // Simple EAN-13 style random barcode generator for demonstration
-        $this->barcode = '84' . rand(10000000000, 99999999999);
+        $this->barcode = '84'.rand(10000000000, 99999999999);
     }
 
     public function save()
@@ -141,7 +159,7 @@ class ProductCatalog extends Component
         $this->show_modal = false;
         $this->reset(['product_id', 'category_id', 'supplier_id', 'name', 'sku', 'barcode', 'description', 'unit_price']);
     }
-    
+
     public function delete($id)
     {
         Product::findOrFail($id)->delete();
@@ -156,11 +174,11 @@ class ProductCatalog extends Component
     public function render()
     {
         $products = Product::query()
-            ->when($this->search, function($query) {
+            ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('sku', 'like', '%' . $this->search . '%')
-                      ->orWhere('barcode', 'like', '%' . $this->search . '%');
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('sku', 'like', '%'.$this->search.'%')
+                        ->orWhere('barcode', 'like', '%'.$this->search.'%');
                 });
             })
             ->with(['category', 'supplier'])
