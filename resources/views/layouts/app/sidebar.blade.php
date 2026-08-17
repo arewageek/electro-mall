@@ -66,6 +66,14 @@
                 </flux:sidebar.group>
                 @endcan
 
+                @can('report.view')
+                <flux:sidebar.group :heading="__('Reporting')" class="grid mt-4">
+                    <flux:sidebar.item icon="document-text" :href="route('admin.reports')" :current="request()->routeIs('admin.reports')" wire:navigate>
+                        {{ __('Activity Reports') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+                @endcan
+
                 @can('user.manage')
                 <flux:sidebar.group :heading="__('Administration')" class="grid mt-4">
                     <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
