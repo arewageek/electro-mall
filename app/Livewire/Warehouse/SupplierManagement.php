@@ -3,24 +3,30 @@
 namespace App\Livewire\Warehouse;
 
 use App\Models\Supplier;
+use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Flux\Flux;
 
 class SupplierManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
-    
+
     public $supplier_id = null;
+
     public $name = '';
+
     public $email = '';
+
     public $phone = '';
+
     public $contact_person = '';
+
     public $address = '';
 
     public $is_editing = false;
+
     public $show_modal = false;
 
     public function rules()
@@ -45,14 +51,14 @@ class SupplierManagement extends Component
     public function edit($id)
     {
         $supplier = Supplier::findOrFail($id);
-        
+
         $this->supplier_id = $supplier->id;
         $this->name = $supplier->name;
         $this->email = $supplier->email;
         $this->phone = $supplier->phone;
         $this->contact_person = $supplier->contact_person;
         $this->address = $supplier->address;
-        
+
         $this->is_editing = true;
         $this->show_modal = true;
         $this->resetValidation();
@@ -81,7 +87,7 @@ class SupplierManagement extends Component
         $this->show_modal = false;
         $this->reset(['supplier_id', 'name', 'email', 'phone', 'contact_person', 'address']);
     }
-    
+
     public function delete($id)
     {
         Supplier::findOrFail($id)->delete();
@@ -96,11 +102,11 @@ class SupplierManagement extends Component
     public function render()
     {
         $suppliers = Supplier::query()
-            ->when($this->search, function($query) {
+            ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%')
-                      ->orWhere('contact_person', 'like', '%' . $this->search . '%');
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        ->orWhere('contact_person', 'like', '%'.$this->search.'%');
                 });
             })
             ->latest()

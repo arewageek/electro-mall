@@ -3,10 +3,9 @@
 namespace App\Livewire\Inventory;
 
 use App\Models\Inventory;
+use App\Models\InventoryVariance;
 use App\Models\Location;
 use App\Models\Product;
-use App\Models\Transaction;
-use App\Models\InventoryVariance;
 use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithPagination;

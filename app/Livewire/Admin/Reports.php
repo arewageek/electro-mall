@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Category;
 use App\Models\Transaction;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -103,18 +104,24 @@ class Reports extends Component
         $filenameBase = 'report_'.date('Ymd_His');
 
         if ($this->export_format === 'pdf') {
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.report', compact('transactions'))
+            $pdf = Pdf::loadView('pdf.report', compact('transactions'))
                 ->setPaper('a4', 'landscape');
-            
+
             return response()->streamDownload(function () use ($pdf) {
                 echo $pdf->output();
             }, $filenameBase.'.pdf');
         }
 
         $csvHeader = ['Date', 'Type', 'Category', 'Product', 'SKU', 'Location', 'Quantity', 'User', 'Reference'];
+        $appName = config('app.name');
 
-        $callback = function () use ($transactions, $csvHeader) {
+        $callback = function () use ($transactions, $csvHeader, $appName) {
             $file = fopen('php://output', 'w');
+
+            // Add a title row
+            fputcsv($file, [$appName.' - Activity Report']);
+            fputcsv($file, []); // Empty row for spacing
+
             fputcsv($file, $csvHeader);
 
             foreach ($transactions as $log) {

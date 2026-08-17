@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h2>Activity Report</h2>
+    <h2>{{ config('app.name') }} - Activity Report</h2>
     <div class="meta">
         Generated on: {{ now()->format('Y-m-d H:i:s') }}
     </div>

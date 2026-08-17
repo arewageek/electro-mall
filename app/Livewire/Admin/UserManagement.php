@@ -3,26 +3,32 @@
 namespace App\Livewire\Admin;
 
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use Flux\Flux;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Validation\Rules\Password;
-use Flux\Flux;
+use Spatie\Permission\Models\Role;
 
 class UserManagement extends Component
 {
     use WithPagination;
 
     public $search = '';
-    
+
     public $user_id = null;
+
     public $first_name = '';
+
     public $last_name = '';
+
     public $email = '';
+
     public $password = '';
+
     public $role = '';
 
     public $is_editing = false;
+
     public $show_modal = false;
 
     public function rules()
@@ -30,7 +36,7 @@ class UserManagement extends Component
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $this->user_id],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$this->user_id],
             'password' => $this->is_editing ? ['nullable', Password::defaults()] : ['required', Password::defaults()],
             'role' => ['required', 'exists:roles,name'],
         ];
@@ -52,7 +58,7 @@ class UserManagement extends Component
         $this->last_name = $user->last_name;
         $this->email = $user->email;
         $this->role = $user->roles->first()?->name ?? '';
-        
+
         $this->is_editing = true;
         $this->show_modal = true;
         $this->resetValidation();
@@ -82,19 +88,20 @@ class UserManagement extends Component
         $user->syncRoles([$this->role]);
 
         $this->show_modal = false;
-        
+
         $message = $this->user_id ? 'User updated successfully.' : 'User created successfully.';
         Flux::toast(variant: 'success', text: __($message));
-        
+
         $this->reset(['user_id', 'first_name', 'last_name', 'email', 'password', 'role']);
     }
-    
+
     public function delete($id)
     {
         $user = User::findOrFail($id);
-        
+
         if (auth()->id() === $user->id) {
             Flux::toast(variant: 'danger', text: __('You cannot delete your own account.'));
+
             return;
         }
 
@@ -110,11 +117,11 @@ class UserManagement extends Component
     public function render()
     {
         $users = User::query()
-            ->when($this->search, function($query) {
+            ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('first_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%');
+                    $q->where('first_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%');
                 });
             })
             ->with('roles')
